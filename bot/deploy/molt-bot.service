@@ -1,0 +1,65 @@
+# MOLT X announcer, hardened systemd unit.
+# Install: see bot/README.md ("Run on a Linux server with systemd").
+# Audit with: systemd-analyze security molt-bot
+
+[Unit]
+Description=MOLT X (Twitter) announcer bot (read-only on NEAR)
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=molt-bot
+Group=molt-bot
+WorkingDirectory=/opt/molt-bot
+# Read by systemd as root before dropping privileges: keep it root:root, mode 0600.
+EnvironmentFile=/etc/molt-bot/molt-bot.env
+ExecStart=/usr/bin/node /opt/molt-bot/dist/main.js
+Restart=on-failure
+RestartSec=30
+# Exit code 78 = invalid configuration: do not crash-loop, fix the env file.
+RestartPreventExitStatus=78
+
+# State (cursor + dry-run output) lives in /var/lib/molt-bot, created by systemd.
+StateDirectory=molt-bot
+StateDirectoryMode=0700
+ReadWritePaths=/var/lib/molt-bot
+UMask=0077
+
+# Filesystem
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectProc=invisible
+
+# Privileges
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+AmbientCapabilities=
+RestrictSUIDSGID=yes
+LockPersonality=yes
+RestrictRealtime=yes
+RestrictNamespaces=yes
+
+# Kernel
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectKernelLogs=yes
+ProtectControlGroups=yes
+ProtectClock=yes
+ProtectHostname=yes
+
+# Network: outbound HTTPS only needs IPv4/IPv6 (+ unix for DNS via nscd/resolved).
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+SystemCallFilter=~@privileged
+# MemoryDenyWriteExecute is deliberately absent: it breaks the V8 JIT.
+
+# Resources
+MemoryMax=256M
+TasksMax=64
+
+[Install]
+WantedBy=multi-user.target
