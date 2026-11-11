@@ -1,29 +1,29 @@
-# MOLT X announcer, hardened systemd unit.
+# SHED X announcer, hardened systemd unit.
 # Install: see bot/README.md ("Run on a Linux server with systemd").
-# Audit with: systemd-analyze security molt-bot
+# Audit with: systemd-analyze security shed-bot
 
 [Unit]
-Description=MOLT X (Twitter) announcer bot (read-only on NEAR)
+Description=SHED X (Twitter) announcer bot (read-only on NEAR)
 Wants=network-online.target
 After=network-online.target
 
 [Service]
 Type=simple
-User=molt-bot
-Group=molt-bot
-WorkingDirectory=/opt/molt-bot
+User=shed-bot
+Group=shed-bot
+WorkingDirectory=/opt/shed-bot
 # Read by systemd as root before dropping privileges: keep it root:root, mode 0600.
-EnvironmentFile=/etc/molt-bot/molt-bot.env
-ExecStart=/usr/bin/node /opt/molt-bot/dist/main.js
+EnvironmentFile=/etc/shed-bot/shed-bot.env
+ExecStart=/usr/bin/node /opt/shed-bot/dist/main.js
 Restart=on-failure
 RestartSec=30
 # Exit code 78 = invalid configuration: do not crash-loop, fix the env file.
 RestartPreventExitStatus=78
 
-# State (cursor + dry-run output) lives in /var/lib/molt-bot, created by systemd.
-StateDirectory=molt-bot
+# State (cursor + dry-run output) lives in /var/lib/shed-bot, created by systemd.
+StateDirectory=shed-bot
 StateDirectoryMode=0700
-ReadWritePaths=/var/lib/molt-bot
+ReadWritePaths=/var/lib/shed-bot
 UMask=0077
 
 # Filesystem

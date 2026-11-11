@@ -1,7 +1,7 @@
 // Text formatting shared by post templates: amounts, accounts, times, X length counting.
 
-const MOLT_DECIMALS = 18n;
-const YOCTO_PER_MOLT = 10n ** MOLT_DECIMALS;
+const SHED_DECIMALS = 18n;
+const YOCTO_PER_SHED = 10n ** SHED_DECIMALS;
 const NS_PER_MS = 1_000_000n;
 const THOUSANDS_GROUP = /\B(?=(\d{3})+(?!\d))/g;
 const MAX_ACCOUNT_CHARS = 28;
@@ -22,10 +22,10 @@ const LIGHT_RANGES: ReadonlyArray<readonly [number, number]> = [
   [8242, 8247],
 ];
 
-/** yocto-MOLT → whole MOLT with thousands separators ("12,345"); "<1" for dust. */
-export function formatMolt(yocto: string | bigint): string {
+/** yocto-SHED → whole SHED with thousands separators ("12,345"); "<1" for dust. */
+export function formatShed(yocto: string | bigint): string {
   const value = BigInt(yocto);
-  const whole = value / YOCTO_PER_MOLT;
+  const whole = value / YOCTO_PER_SHED;
   if (whole === 0n && value > 0n) return "<1";
   return whole.toString().replace(THOUSANDS_GROUP, ",");
 }

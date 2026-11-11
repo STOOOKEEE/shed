@@ -1,6 +1,6 @@
 [package]
-name = "molt"
-description = "MOLT: a NEP-141 memecoin whose community burns tokens to transform its mascot; every cycle's look becomes an auctioned NFT skin."
+name = "shed"
+description = "SHED: a NEP-141 memecoin whose community burns tokens to transform its mascot; every cycle's look becomes an auctioned NFT skin."
 version = "0.1.0"
 edition = "2024"
 resolver = "3"
@@ -41,6 +41,8 @@ container_build_command = [
 near-contract-standards = "5.29"
 near-sdk = "5.29"
 uint = { version = "0.10", default-features = false }
+shed-art = { path = "art" }
+shed-exuviae = { path = "exuviae" }
 
 [dev-dependencies]
 near-sdk = { version = "5.29", features = ["unit-testing"] }

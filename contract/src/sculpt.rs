@@ -1,4 +1,4 @@
-//! Sculpting: burning $MOLT to change one trait of the mascot, and closing a cycle into a skin.
+//! Sculpting: burning $SHED to change one trait of the mascot, and closing a cycle into a skin.
 
 use near_sdk::json_types::U128;
 use near_sdk::{AccountId, env, near, require};
@@ -8,7 +8,7 @@ use crate::journal::{JournalEntry, JournalKind};
 use crate::pricing;
 use crate::slots::{PerSlot, Slot};
 use crate::storage::{self, CONTRIBUTION_STORAGE_BYTES, SKIN_STORAGE_BYTES, bytes_cost};
-use crate::{Molt, MoltExt};
+use crate::{Shed, ShedExt};
 
 #[near(serializers = [json, borsh])]
 #[derive(Clone, Debug, PartialEq)]
@@ -37,7 +37,7 @@ impl CycleState {
 }
 
 #[near]
-impl Molt {
+impl Shed {
     /// Burns the current price of `slot` from the caller and sets it to `variant`.
     /// Attach `transform_deposit(account_id)`: the storage this change creates (at least 1 yocto,
     /// which also forces a full-access-key confirmation). The excess is refunded.
@@ -88,7 +88,7 @@ impl Molt {
     }
 }
 
-impl Molt {
+impl Shed {
     pub(crate) fn slot_price(&self, cycle: &CycleState, slot: Slot) -> u128 {
         pricing::slot_price(
             self.config.base_transform_price.0,
@@ -149,7 +149,7 @@ impl Molt {
         self.journal.record(JournalEntry {
             amount: U128(self.cycle.burned),
             skin_id: Some(skin_id),
-            ..JournalEntry::new(JournalKind::Molt, cycle)
+            ..JournalEntry::new(JournalKind::Shed, cycle)
         });
     }
 }

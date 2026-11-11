@@ -1,18 +1,18 @@
-//! 60-cycle (60-day) simulation of $MOLT supply under several community behaviours, using the
+//! 60-cycle (60-day) simulation of $SHED supply under several community behaviours, using the
 //! contract's own pricing functions. Deterministic (fixed seed).
 //! Run: `cargo run --example simulate` — prints a markdown report and writes
 //! `docs/simulation.svg`.
 
 use std::fs;
 
-use molt::pricing::{slot_price, split_winning_bid};
+use shed::pricing::{slot_price, split_winning_bid};
 
 const CYCLES: u32 = 60;
 const SLOTS: usize = 6;
 const TOTAL_SUPPLY: f64 = 1_000_000_000.0;
 const PRICE_GROWTH_BPS: u32 = 15_000;
 const AUCTION_BURN_BPS: u32 = 5_000;
-/// Base prices compared (whole MOLT). The chart uses `CHOSEN_BASE_PRICE`.
+/// Base prices compared (whole SHED). The chart uses `CHOSEN_BASE_PRICE`.
 const BASE_PRICES: [u128; 3] = [1_000, 10_000, 100_000];
 const CHOSEN_BASE_PRICE: u128 = 10_000;
 const CHART_PATH: &str = "../docs/simulation.svg";
@@ -136,7 +136,7 @@ fn print_report() {
     println!("## Supply burned after {CYCLES} daily cycles (% of 1B)\n");
     print!("| Scenario |");
     for base in BASE_PRICES {
-        print!(" base {base} MOLT |");
+        print!(" base {base} SHED |");
     }
     println!("\n|---|{}", "---|".repeat(BASE_PRICES.len()));
     for scenario in &SCENARIOS {
@@ -149,7 +149,7 @@ fn print_report() {
         }
         println!();
     }
-    println!("\n## Chosen base price {CHOSEN_BASE_PRICE} MOLT: burned % by day\n");
+    println!("\n## Chosen base price {CHOSEN_BASE_PRICE} SHED: burned % by day\n");
     println!("| Scenario | day 7 | day 14 | day 30 | day 60 |\n|---|---|---|---|---|");
     for scenario in &SCENARIOS {
         let supply = simulate(scenario, CHOSEN_BASE_PRICE);
@@ -182,7 +182,7 @@ fn chart_svg() -> String {
     let x = |cycle: usize| MARGIN + (WIDTH - 2.0 * MARGIN) * cycle as f64 / f64::from(CYCLES);
     let y = |percent: f64| HEIGHT - MARGIN - (HEIGHT - 2.0 * MARGIN) * percent / max_burn;
     let mut svg = format!(
-        r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {HEIGHT}" font-family="monospace" font-size="12"><rect width="{WIDTH}" height="{HEIGHT}" fill="#0b1a33"/><text x="{MARGIN}" y="24" fill="#fff">$MOLT burned (% of supply), base price {CHOSEN_BASE_PRICE} MOLT, ×1.5 per change</text><path d="M{MARGIN} {MARGIN}V{}H{}" stroke="#8aa" fill="none"/><text x="{MARGIN}" y="{}" fill="#8aa">day 0</text><text x="{}" y="{}" fill="#8aa" text-anchor="end">day {CYCLES}</text><text x="8" y="{}" fill="#8aa">{max_burn}%</text>"##,
+        r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {WIDTH} {HEIGHT}" font-family="monospace" font-size="12"><rect width="{WIDTH}" height="{HEIGHT}" fill="#0b1a33"/><text x="{MARGIN}" y="24" fill="#fff">$SHED burned (% of supply), base price {CHOSEN_BASE_PRICE} SHED, ×1.5 per change</text><path d="M{MARGIN} {MARGIN}V{}H{}" stroke="#8aa" fill="none"/><text x="{MARGIN}" y="{}" fill="#8aa">day 0</text><text x="{}" y="{}" fill="#8aa" text-anchor="end">day {CYCLES}</text><text x="8" y="{}" fill="#8aa">{max_burn}%</text>"##,
         HEIGHT - MARGIN,
         WIDTH - MARGIN,
         HEIGHT - MARGIN + 16.0,

@@ -1,4 +1,4 @@
-//! $MOLT fungible token: NEP-141 core, NEP-145 storage, NEP-148 metadata, plus the internal
+//! $SHED fungible token: NEP-141 core, NEP-145 storage, NEP-148 metadata, plus the internal
 //! movements the mechanic needs (burn, escrow, payout).
 
 use near_contract_standards::fungible_token::events::FtBurn;
@@ -12,13 +12,13 @@ use near_contract_standards::storage_management::{
 use near_sdk::json_types::U128;
 use near_sdk::{AccountId, NearToken, PromiseOrValue, env, log, near, require};
 
-use crate::render::svg_data_uri;
-use crate::{Molt, MoltExt};
+use crate::{Shed, ShedExt};
+use shed_art::svg_data_uri;
 
 pub const DECIMALS: u8 = 18;
 const ICON_SVG: &str = r##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><circle cx="16" cy="16" r="16" fill="#0b1a33"/><ellipse cx="16" cy="19" rx="8" ry="9" fill="#e63946"/><circle cx="12" cy="9" r="3" fill="#fff"/><circle cx="20" cy="9" r="3" fill="#fff"/><circle cx="12" cy="9" r="1.3"/><circle cx="20" cy="9" r="1.3"/></svg>"##;
 
-impl Molt {
+impl Shed {
     /// Destroys `amount` of `account`'s tokens and lowers the total supply.
     pub(crate) fn burn(&mut self, account: &AccountId, amount: u128, memo: &str) {
         if amount == 0 {
@@ -57,7 +57,7 @@ impl Molt {
 }
 
 #[near]
-impl FungibleTokenCore for Molt {
+impl FungibleTokenCore for Shed {
     #[payable]
     fn ft_transfer(&mut self, receiver_id: AccountId, amount: U128, memo: Option<String>) {
         self.token.ft_transfer(receiver_id, amount, memo)
@@ -84,7 +84,7 @@ impl FungibleTokenCore for Molt {
 }
 
 #[near]
-impl FungibleTokenResolver for Molt {
+impl FungibleTokenResolver for Shed {
     #[private]
     fn ft_resolve_transfer(
         &mut self,
@@ -103,7 +103,7 @@ impl FungibleTokenResolver for Molt {
 }
 
 #[near]
-impl StorageManagement for Molt {
+impl StorageManagement for Shed {
     #[payable]
     fn storage_deposit(
         &mut self,
@@ -157,12 +157,12 @@ impl StorageManagement for Molt {
 }
 
 #[near]
-impl FungibleTokenMetadataProvider for Molt {
+impl FungibleTokenMetadataProvider for Shed {
     fn ft_metadata(&self) -> FungibleTokenMetadata {
         FungibleTokenMetadata {
             spec: FT_METADATA_SPEC.to_string(),
-            name: "MOLT".to_string(),
-            symbol: "MOLT".to_string(),
+            name: "SHED".to_string(),
+            symbol: "SHED".to_string(),
             icon: Some(svg_data_uri(ICON_SVG)),
             reference: None,
             reference_hash: None,

@@ -4,7 +4,7 @@
 // are handled, so a crash in between may repeat a post, never lose one. A post rejected by X is
 // logged and not retried (the bot is cosmetic; retry loops would cost money and spam).
 
-import { composeBatch, composeMolt, composeSettle, type ComposeContext } from "./compose.js";
+import { composeBatch, composeShed, composeSettle, type ComposeContext } from "./compose.js";
 import { entriesAfter, JOURNAL_CAPACITY, mayHaveGap, newestCursor, shouldFlushBatch } from "./events.js";
 import { log } from "./log.js";
 import type { Post, Publisher } from "./publish.js";
@@ -72,7 +72,7 @@ export class Announcer {
 
   private async handle(entry: JournalEntry): Promise<void> {
     switch (entry.kind) {
-      case "molt":
+      case "shed":
       case "settle":
         await this.announceSkin(entry);
         return;
@@ -100,11 +100,11 @@ export class Announcer {
       return;
     }
     const text =
-      entry.kind === "molt"
-        ? composeMolt(entry, skin, this.options.auctionBurnBps, this.options.compose)
+      entry.kind === "shed"
+        ? composeShed(entry, skin, this.options.auctionBurnBps, this.options.compose)
         : composeSettle(entry, skin, this.options.compose);
     await this.publish({
-      kind: entry.kind === "molt" ? "molt" : "settle",
+      kind: entry.kind === "shed" ? "shed" : "settle",
       text,
       png: renderPng(skin.svg),
       meta: { cycle: skin.cycle, skin_id: skin.skin_id, at_ns: entry.at_ns },

@@ -1,27 +1,27 @@
 //! Read-only methods. `mascot()` and `transform_deposit()` report the effective state at the
 //! current block time. Auctions are reported as stored: one past `ends_at_ns` but not
-//! `settled` is waiting for the next call (any call, or `molt()`) to settle it.
+//! `settled` is waiting for the next call (any call, or `shed()`) to settle it.
 
 use near_sdk::json_types::{U64, U128};
 use near_sdk::{AccountId, near, require};
 
 use crate::auction::SkinRecord;
-use crate::config::MoltConfig;
+use crate::config::ShedConfig;
 use crate::face::FaceView;
 use crate::journal::JournalEntry;
-use crate::render::{render_svg, variant_names};
 use crate::schedule;
 use crate::sculpt::{CycleState, Sculptor};
 use crate::slots::{Genome, PerSlot, Slot};
 use crate::storage::{AIRDROP_CLAIM_STORAGE_BYTES, MIN_DEPOSIT_YOCTO, bytes_cost};
-use crate::{Molt, MoltExt};
+use crate::{Shed, ShedExt};
+use shed_art::{render_svg, variant_names};
 
 const DEFAULT_PAGE_SIZE: u32 = 20;
 
 #[near(serializers = [json])]
 pub struct ConfigView {
     #[serde(flatten)]
-    pub config: MoltConfig,
+    pub config: ShedConfig,
     pub genesis_ns: U64,
 }
 
@@ -35,8 +35,8 @@ pub struct CatalogEntry {
 pub struct MascotView {
     pub cycle: u32,
     pub cycle_ends_at_ns: U64,
-    /// A sculpted cycle is over; the next call (or `molt()`) will freeze it into a skin.
-    pub molt_pending: bool,
+    /// A sculpted cycle is over; the next call (or `shed()`) will freeze it into a skin.
+    pub shed_pending: bool,
     pub genome: Genome,
     pub svg: String,
     pub slot_prices: PerSlot<U128>,
@@ -79,7 +79,7 @@ pub struct StatsView {
 }
 
 #[near]
-impl Molt {
+impl Shed {
     pub fn config(&self) -> ConfigView {
         ConfigView {
             config: self.config.clone(),
@@ -107,7 +107,7 @@ impl Molt {
         } else {
             &self.cycle
         };
-        let molt_pending = cycle_is_stale && self.cycle.top_sculptor.is_some();
+        let shed_pending = cycle_is_stale && self.cycle.top_sculptor.is_some();
         MascotView {
             cycle: cycle.number,
             cycle_ends_at_ns: U64(schedule::cycle_end(
@@ -115,7 +115,7 @@ impl Molt {
                 self.config.cycle_duration_ns.0,
                 cycle.number,
             )),
-            molt_pending,
+            shed_pending,
             genome: self.genome,
             svg: render_svg(&self.genome),
             slot_prices: PerSlot::from_fn(|slot| U128(self.slot_price(cycle, slot))),
@@ -216,7 +216,7 @@ impl Molt {
     }
 }
 
-impl Molt {
+impl Shed {
     fn auction_view(&self, skin_id: u32, record: &SkinRecord) -> AuctionView {
         let auction = &record.auction;
         AuctionView {

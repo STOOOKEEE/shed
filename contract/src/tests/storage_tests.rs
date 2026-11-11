@@ -44,7 +44,7 @@ fn a_returning_sculptor_only_attaches_one_yocto() {
 }
 
 #[test]
-fn a_pending_molt_means_the_next_change_opens_a_new_skin() {
+fn a_pending_shed_means_the_next_change_opens_a_new_skin() {
     let mut contract = new_contract();
     let alice = account("alice");
     fund(&mut contract, &alice, 10_000, GENESIS);
@@ -81,11 +81,11 @@ fn the_skin_budget_covers_the_largest_skin_for_its_whole_life() {
     }
     let before = env::storage_usage();
     call_as(&sculptor, GENESIS + CYCLE, 0);
-    contract.molt();
+    contract.shed();
     call_as(&bidder, GENESIS + CYCLE + 1, 1);
     contract.bid(1, U128(MIN_BID));
     call_as(&bidder, GENESIS + CYCLE + AUCTION, 0);
-    contract.molt();
+    contract.shed();
     assert_eq!(contract.skin(1).unwrap().owner_id, bidder);
     let used = env::storage_usage().saturating_sub(before);
     assert!(used <= SKIN_STORAGE_BYTES, "a skin used {used} bytes");

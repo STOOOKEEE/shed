@@ -8,12 +8,12 @@ use near_sdk::json_types::U128;
 use near_sdk::test_utils::get_logs;
 
 use super::*;
-use crate::render::{render_svg, svg_data_uri};
 use crate::slots::Slot;
+use shed_art::{render_svg, svg_data_uri};
 
 const FUNDS: u128 = 10_000;
 
-fn two_sculptors() -> (Molt, AccountId, AccountId) {
+fn two_sculptors() -> (Shed, AccountId, AccountId) {
     let mut contract = new_contract();
     let (alice, bob) = (account("alice"), account("bob"));
     fund(&mut contract, &alice, FUNDS, GENESIS);
@@ -94,11 +94,11 @@ fn only_one_face_ever_exists() {
 }
 
 #[test]
-fn the_face_survives_a_molt() {
+fn the_face_survives_a_shed() {
     let (mut contract, alice, _) = two_sculptors();
     sculpt(&mut contract, &alice, GENESIS + 1, Slot::Headgear, 1);
     call_as(&alice, GENESIS + CYCLE, 0);
-    contract.molt();
+    contract.shed();
     assert_eq!(
         contract.nft_token("face-1".to_string()).unwrap().owner_id,
         alice

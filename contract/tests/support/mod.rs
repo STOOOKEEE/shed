@@ -7,8 +7,8 @@ use near_sdk::serde_json::{Value, json};
 
 pub type TestResult<T = ()> = testresult::TestResult<T>;
 
-/// 10^18: one whole MOLT.
-pub const MOLT: u128 = 1_000_000_000_000_000_000;
+/// 10^18: one whole SHED.
+pub const SHED: u128 = 1_000_000_000_000_000_000;
 pub const ONE_YOCTO: NearToken = NearToken::from_yoctonear(1);
 pub const NO_DEPOSIT: NearToken = NearToken::from_yoctonear(0);
 const NANOS_PER_SECOND: u64 = 1_000_000_000;
@@ -17,10 +17,10 @@ const ACCOUNT_BALANCE: NearToken = NearToken::from_near(50);
 const FAST_FORWARD_STEP: u64 = 50;
 
 /// Launch parameters of the demo deployments (see README), with a configurable cycle length.
-pub const TOTAL_SUPPLY: u128 = 1_000_000_000 * MOLT;
-pub const AIRDROP: u128 = 100_000 * MOLT;
-pub const BASE_PRICE: u128 = 10_000 * MOLT;
-pub const MIN_BID: u128 = 5_000 * MOLT;
+pub const TOTAL_SUPPLY: u128 = 1_000_000_000 * SHED;
+pub const AIRDROP: u128 = 100_000 * SHED;
+pub const BASE_PRICE: u128 = 10_000 * SHED;
+pub const MIN_BID: u128 = 5_000 * SHED;
 
 pub fn demo_config(holder: &AccountId, cycle_seconds: u64) -> Value {
     let cycle_ns = cycle_seconds * NANOS_PER_SECOND;
@@ -44,11 +44,13 @@ pub struct Env {
     pub sandbox: near_sandbox::Sandbox,
     pub network: NetworkConfig,
     pub contract: near_api::Contract,
+    #[allow(dead_code)] // used by future exuviae e2e checks
+    pub exuviae_id: AccountId,
     signer: Arc<Signer>,
 }
 
 impl Env {
-    /// Starts a sandbox, builds the wasm and deploys MOLT with `demo_config`.
+    /// Starts a sandbox, builds the wasm and deploys SHED with `demo_config`.
     pub async fn start(cycle_seconds: u64) -> TestResult<Self> {
         let sandbox = near_sandbox::Sandbox::start_sandbox().await?;
         let network = NetworkConfig::from_rpc_url("sandbox", sandbox.rpc_addr.parse()?);
@@ -56,14 +58,39 @@ impl Env {
             near_sandbox::config::DEFAULT_GENESIS_ACCOUNT_PRIVATE_KEY.parse()?,
         )?;
         let holder = create_account(&sandbox, "holder").await?;
-        let contract_id = create_account(&sandbox, "molt").await?;
-        let wasm = std::fs::read(cargo_near_build::build_with_cli(Default::default())?)?;
+        let contract_id = create_account(&sandbox, "shed").await?;
+        let exuviae_id = create_account(&sandbox, "exuviae").await?;
+        let manifest = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_default();
+        let wasm_path =
+            std::path::Path::new(&manifest).join("target/wasm32-unknown-unknown/../near/shed.wasm");
+        if !wasm_path.exists() {
+            let status = std::process::Command::new("cargo")
+                .args(["build", "--release", "--target", "wasm32-unknown-unknown"])
+                .current_dir(&manifest)
+                .status()?;
+            assert!(status.success(), "wasm build failed");
+        }
+        let wasm = std::fs::read(&wasm_path)?;
         near_api::Contract::deploy(contract_id.clone())
             .use_code(wasm)
             .with_init_call(
                 "new",
-                json!({ "config": demo_config(&holder, cycle_seconds) }),
+                json!({
+                    "config": demo_config(&holder, cycle_seconds),
+                    "exuviae_contract": exuviae_id,
+                }),
             )?
+            .with_signer(signer.clone())
+            .send_to(&network)
+            .await?
+            .assert_success();
+        let exuviae_wasm = std::fs::read(
+            std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap_or_default())
+                .join("exuviae/target/wasm32-unknown-unknown/release/shed_exuviae.wasm"),
+        )?;
+        near_api::Contract::deploy(exuviae_id.clone())
+            .use_code(exuviae_wasm)
+            .with_init_call("exuviae_new", json!({ "minter": contract_id }))?
             .with_signer(signer.clone())
             .send_to(&network)
             .await?
@@ -72,6 +99,7 @@ impl Env {
             sandbox,
             network,
             contract: near_api::Contract(contract_id),
+            exuviae_id,
             signer,
         })
     }
@@ -123,6 +151,16 @@ impl Env {
             .with_signer(who.clone(), self.signer.clone())
             .send_to(&self.network)
             .await?)
+    }
+
+    /// View call on the Exuviae contract.
+    pub async fn view_exuviae(&self, method: &str, args: Value) -> TestResult<Value> {
+        Ok(near_api::Contract(self.exuviae_id.clone())
+            .call_function(method, args)
+            .read_only()
+            .fetch_from(&self.network)
+            .await?
+            .data)
     }
 
     pub async fn view(&self, method: &str, args: Value) -> TestResult<Value> {
@@ -178,8 +216,8 @@ impl Env {
         .await
     }
 
-    pub async fn bid(&self, who: &AccountId, skin_id: u32, molt: u128) -> TestResult {
-        let args = json!({ "skin_id": skin_id, "amount": (molt * MOLT).to_string() });
+    pub async fn bid(&self, who: &AccountId, skin_id: u32, shed: u128) -> TestResult {
+        let args = json!({ "skin_id": skin_id, "amount": (shed * SHED).to_string() });
         self.call(who, "bid", args, ONE_YOCTO).await
     }
 

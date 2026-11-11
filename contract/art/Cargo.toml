@@ -1,0 +1,22 @@
+[package]
+name = "shed-art"
+description = "Shared pixel-art renderer of the SHED contracts (sprites, layer stacking, SVG)."
+version = "0.1.0"
+edition = "2024"
+resolver = "3"
+rust-version = "1.93"
+
+[lib]
+crate-type = ["rlib"]
+
+[features]
+non-contract-usage = []
+
+[dependencies]
+serde = { version = "1", default-features = false, features = ["derive"] }
+borsh = { version = "1", default-features = false, features = ["unstable__schema"] }
+schemars = "0.8"
+near-sdk = "5.29"
+
+[lints.rust]
+unexpected_cfgs = { level = "allow", check-cfg = ['cfg(near)'] }

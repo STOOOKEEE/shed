@@ -1,12 +1,12 @@
-//! MOLT — the memecoin that sheds its skins. See `docs/design.md`.
+//! SHED — the memecoin that sheds its skins. See `docs/design.md`.
 //!
-//! One contract is both the NEP-141 token ($MOLT) and the NEP-171 collection of skins.
+//! One contract is both the NEP-141 token ($SHED) and the NEP-171 collection of skins.
 //! There is no owner and no admin method: every parameter is fixed by `new`.
 
 pub mod config;
 pub mod journal;
 pub mod pricing;
-pub mod render;
+
 pub mod schedule;
 pub mod slots;
 pub mod storage;
@@ -29,11 +29,12 @@ use near_sdk::store::{LookupMap, LookupSet, Vector};
 use near_sdk::{AccountId, BorshStorageKey, PanicOnDefault, env, near};
 
 use crate::auction::SkinRecord;
-use crate::config::MoltConfig;
+use crate::config::ShedConfig;
 use crate::face::FaceRecord;
 use crate::journal::Journal;
 use crate::sculpt::CycleState;
 use crate::slots::Genome;
+pub use shed_exuviae;
 
 #[near]
 #[derive(BorshStorageKey)]
@@ -51,8 +52,8 @@ enum StorageKey {
 
 #[near(contract_state)]
 #[derive(PanicOnDefault)]
-pub struct Molt {
-    config: MoltConfig,
+pub struct Shed {
+    config: ShedConfig,
     genesis_ns: u64,
     token: FungibleToken,
     skin_nft: NonFungibleToken,
@@ -73,16 +74,18 @@ pub struct Molt {
     /// The live face NFT and how many were ever minted (token ids `face-1`, `face-2`, …).
     face: Option<FaceRecord>,
     faces_minted: u32,
+    /// The burn collection (Exuviae) contract account, if deployed. Set once at init.
+    exuviae_contract: Option<AccountId>,
     journal: Journal,
 }
 
 #[near]
-impl Molt {
+impl Shed {
     /// Launches the token. `#[private]`: only the contract account itself, in the deploy
     /// transaction, can initialise it.
     #[init]
     #[private]
-    pub fn new(config: MoltConfig) -> Self {
+    pub fn new(config: ShedConfig, exuviae_contract: Option<AccountId>) -> Self {
         let contract_id = env::current_account_id();
         if let Err(error) = config.validate(&contract_id) {
             env::panic_str(error);
@@ -130,6 +133,7 @@ impl Molt {
             burned_by_auction: 0,
             face: None,
             faces_minted: 0,
+            exuviae_contract,
             journal: Journal::new(StorageKey::Journal),
             config,
         }
@@ -138,12 +142,12 @@ impl Molt {
     /// Permissionless keeper call: settles finished auctions and closes finished cycles.
     /// Every state-changing method does the same first, so calling this is never required.
     /// Returns `true` if anything changed.
-    pub fn molt(&mut self) -> bool {
+    pub fn shed(&mut self) -> bool {
         self.advance()
     }
 }
 
-impl Molt {
+impl Shed {
     fn now() -> u64 {
         env::block_timestamp()
     }

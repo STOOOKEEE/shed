@@ -29,11 +29,11 @@ export function mountLayout(app: HTMLElement): Layout {
         <aside class="hero-preview" id="hero-preview"></aside>
       </section>
       <section class="panel" aria-labelledby="sculpt-title">
-        <h2 id="sculpt-title" class="tape">Sculpt <small>burn $MOLT to change a trait</small></h2>
+        <h2 id="sculpt-title" class="tape">Sculpt <small>burn $SHED to change a trait</small></h2>
         <div id="sculpt">${WAITING}</div>
       </section>
       <section class="panel" aria-labelledby="auctions-title">
-        <h2 id="auctions-title" class="tape">Auctions <small>skins of past cycles, bid in $MOLT</small></h2>
+        <h2 id="auctions-title" class="tape">Auctions <small>skins of past cycles, bid in $SHED</small></h2>
         <div id="auctions">${WAITING}</div>
       </section>
       <section class="panel" aria-labelledby="gallery-title">
@@ -73,7 +73,7 @@ export function mountLayout(app: HTMLElement): Layout {
 export function renderFatal(app: HTMLElement, report: ErrorReport): void {
   app.innerHTML = `
     <main class="fatal" role="alert">
-      <p class="brand-mark">$MOLT</p>
+      <p class="brand-mark">$SHED</p>
       <p class="badge badge-alert">${escapeHtml(report.title)}</p>
       <p>${escapeHtml(report.detail)}</p>
     </main>`;

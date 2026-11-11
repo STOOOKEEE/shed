@@ -21,7 +21,7 @@ export interface WalletService {
   bid(skinId: number, amountYocto: bigint): Promise<void>;
   claimSculptorShare(skinId: number): Promise<void>;
   claimAirdrop(): Promise<void>;
-  molt(): Promise<void>;
+  shed(): Promise<void>;
 }
 
 function functionCall(methodName: string, args: object, gas: string, deposit: string): FunctionCallAction {
@@ -98,7 +98,7 @@ export function createWallet(
     },
     claimSculptorShare: (skinId) =>
       send([functionCall("claim_sculptor_share", { skin_id: skinId }, GAS_FULL, NO_DEPOSIT)]),
-    molt: () => send([functionCall("molt", {}, GAS_FULL, NO_DEPOSIT)]),
+    shed: () => send([functionCall("shed", {}, GAS_FULL, NO_DEPOSIT)]),
     async claimAirdrop() {
       const account = requireAccount();
       const [registration, airdropDeposit] = await Promise.all([

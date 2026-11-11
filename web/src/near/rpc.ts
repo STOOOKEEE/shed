@@ -1,4 +1,4 @@
-// Typed, wallet-free view calls against the MOLT contract.
+// Typed, wallet-free view calls against the SHED contract.
 import { JsonRpcProvider } from "near-api-js";
 import type { AppConfig } from "../config";
 import * as decode from "../contract/decode";

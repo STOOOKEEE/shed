@@ -1,4 +1,4 @@
-// Read-only NEAR JSON-RPC client for the MOLT contract views. No keys, no signing.
+// Read-only NEAR JSON-RPC client for the SHED contract views. No keys, no signing.
 
 import {
   asArray,
@@ -35,7 +35,7 @@ export class ChainClient {
       headers: { "content-type": "application/json" },
       body: JSON.stringify({
         jsonrpc: "2.0",
-        id: "molt-bot",
+        id: "shed-bot",
         method: "query",
         params: {
           request_type: "call_function",

@@ -1,4 +1,4 @@
-/* MOLT — undersea punk zine. */
+/* SHED — undersea punk zine. */
 
 :root {
   --abyss: #030d16;
@@ -715,7 +715,7 @@ main {
   border-left-color: var(--coral);
 }
 
-.journal .journal-molt,
+.journal .journal-shed,
 .journal .journal-settle {
   border-left-color: var(--kelp);
   background: rgba(63, 224, 185, 0.06);

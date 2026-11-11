@@ -2,7 +2,7 @@
 import { actionTarget, escapeHtml, memoRender } from "../dom";
 import type { CatalogEntry, Mascot, Slot } from "../contract/types";
 import { SLOTS } from "../contract/types";
-import { formatMolt, formatNear } from "../format";
+import { formatShed, formatNear } from "../format";
 
 export interface SculptData {
   catalog: CatalogEntry[];
@@ -51,7 +51,7 @@ function slotRow(entry: CatalogEntry, mascot: Mascot, selected: Choice | null): 
     <div class="slot-row">
       <div class="slot-head">
         <h3>${entry.slot}</h3>
-        <span class="price">${formatMolt(mascot.slot_prices[entry.slot])} MOLT</span>
+        <span class="price">${formatShed(mascot.slot_prices[entry.slot])} SHED</span>
         <span class="muted small">${changes} change${changes === 1 ? "" : "s"} this cycle</span>
       </div>
       <div class="variants">${buttons}</div>
@@ -76,11 +76,11 @@ function confirmBar(data: SculptData, selected: Choice): string {
   const blocker = !data.canSign
     ? "Sign in to sculpt."
     : data.balance !== null && BigInt(data.balance) < BigInt(price)
-      ? "Not enough MOLT for this burn."
+      ? "Not enough SHED for this burn."
       : null;
   return `
     <div class="confirm-bar">
-      <p>Burn <strong>${formatMolt(price)} MOLT</strong> to set ${escapeHtml(selected.slot)} →
+      <p>Burn <strong>${formatShed(price)} SHED</strong> to set ${escapeHtml(selected.slot)} →
         <strong>${escapeHtml(name)}</strong>${blocker ? ` <span class="warn">${blocker}</span>` : ""}</p>
       <div class="row">
         ${depositNote(data)}

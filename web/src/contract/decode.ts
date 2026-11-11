@@ -114,7 +114,7 @@ export const mascot: Decoder<Mascot> = (value, path) => {
   return {
     cycle: f("cycle", number),
     cycle_ends_at_ns: f("cycle_ends_at_ns", uintString),
-    molt_pending: f("molt_pending", boolean),
+    shed_pending: f("shed_pending", boolean),
     genome: f("genome", perSlot(number)),
     svg: f("svg", string),
     slot_prices: f("slot_prices", perSlot(uintString)),

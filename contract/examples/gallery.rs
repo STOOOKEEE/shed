@@ -3,8 +3,8 @@
 
 use std::{fs, path::Path};
 
-use molt::render::{render_svg, variant_names};
-use molt::slots::{Genome, Slot};
+use shed::slots::{Genome, Slot};
+use shed_art::{render_svg, variant_names};
 
 const OUTPUT_DIR: &str = "../docs/gallery";
 

@@ -1,8 +1,8 @@
 {
-  "name": "molt-x-bot",
+  "name": "shed-x-bot",
   "private": true,
   "version": "0.1.0",
-  "description": "Off-chain X (Twitter) announcer for the MOLT lobster. Read-only on NEAR.",
+  "description": "Off-chain X (Twitter) announcer for the SHED lobster. Read-only on NEAR.",
   "type": "module",
   "engines": {
     "node": ">=22"

@@ -34,7 +34,7 @@ export function describeError(error: unknown, ctx: ErrorContext | null = null): 
     return { title: "Contract account not found", detail: `The account ${contract} does not exist on this network.` };
   }
   if (/MethodNotFound|MethodResolveError|method .* not found/i.test(message)) {
-    return { title: "Wrong contract", detail: `${contract} does not expose the MOLT interface (${message}).` };
+    return { title: "Wrong contract", detail: `${contract} does not expose the SHED interface (${message}).` };
   }
   if (/Failed to fetch|NetworkError|fetch failed|ECONNREFUSED|ENOTFOUND|timed? ?out|Load failed|50[234]|exceeded/i.test(message)) {
     const node = ctx?.nodeUrl ?? "the RPC node";

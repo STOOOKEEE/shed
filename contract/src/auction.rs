@@ -1,4 +1,4 @@
-//! Skin auctions in $MOLT: escrowed bids, anti-snipe extension, settlement (burn + sculptor
+//! Skin auctions in $SHED: escrowed bids, anti-snipe extension, settlement (burn + sculptor
 //! pool) and pro-rata claims by the cycle's sculptors.
 
 use near_sdk::json_types::U128;
@@ -7,7 +7,7 @@ use near_sdk::{AccountId, assert_one_yocto, env, near, require};
 use crate::journal::{JournalEntry, JournalKind};
 use crate::pricing;
 use crate::slots::Genome;
-use crate::{Molt, MoltExt};
+use crate::{Shed, ShedExt};
 
 #[near(serializers = [borsh])]
 #[derive(Clone)]
@@ -39,8 +39,8 @@ pub struct SkinRecord {
 }
 
 #[near]
-impl Molt {
-    /// Bids `amount` $MOLT on a skin. The tokens are escrowed; the previous highest bidder
+impl Shed {
+    /// Bids `amount` $SHED on a skin. The tokens are escrowed; the previous highest bidder
     /// is refunded in the same call (raising your own bid escrows only the difference).
     /// Requires 1 yoctoNEAR.
     #[payable]
@@ -117,7 +117,7 @@ impl Molt {
     }
 }
 
-impl Molt {
+impl Shed {
     pub(crate) fn skin_record(&self, skin_id: u32) -> Option<&SkinRecord> {
         skin_id
             .checked_sub(1)

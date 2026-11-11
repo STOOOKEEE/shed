@@ -1,5 +1,5 @@
-//! Starts a local NEAR sandbox, deploys MOLT with 10-minute cycles, plays a few rounds
-//! (airdrop, sculpting, a molt, bids, a slot fight) and keeps the node running so the web app
+//! Starts a local NEAR sandbox, deploys SHED with 10-minute cycles, plays a few rounds
+//! (airdrop, sculpting, a shed, bids, a slot fight) and keeps the node running so the web app
 //! can read it. Run: `cargo run --example local_demo`, then start the web app with the printed
 //! variables.
 
@@ -15,7 +15,7 @@ const CYCLE_SECONDS: u64 = 600;
 
 #[tokio::main]
 async fn main() -> TestResult {
-    println!("Starting sandbox, building and deploying MOLT…");
+    println!("Starting sandbox, building and deploying SHED…");
     let env = Env::start(CYCLE_SECONDS).await?;
     let alice = env.account("alice").await?;
     let bob = env.account("bob").await?;
@@ -33,7 +33,7 @@ async fn main() -> TestResult {
 
     println!("Cycle 2: skin #1 goes to auction, then a fight over the shell");
     env.wait_cycles(1).await?;
-    env.call(&carol, "molt", json!({}), NO_DEPOSIT).await?;
+    env.call(&carol, "shed", json!({}), NO_DEPOSIT).await?;
     env.bid(&carol, 1, 20_000).await?;
     env.bid(&alice, 1, 30_000).await?;
     env.sculpt(&bob, "shell", 1).await?;

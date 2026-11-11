@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""End-to-end smoke test of a live MOLT deployment on NEAR testnet.
+"""End-to-end smoke test of a live SHED deployment on NEAR testnet.
 
 Plays a full round with two funded testnet accounts whose keys are in the system keychain
-(near-cli-rs `save-to-keychain`): airdrop, sculpting (face mint/burn), a molt, two bids,
+(near-cli-rs `save-to-keychain`): airdrop, sculpting (face mint/burn), a shed, two bids,
 settlement and a sculptor claim. Every step is checked against the contract views.
 
 Usage: scripts/smoke_testnet.py <contract.testnet> <player1.testnet> <player2.testnet>
@@ -123,10 +123,10 @@ def main(contract, p1, p2):
     check(int(view(contract, "ft_total_supply")) == supply_before - 2 * base_price,
           "both prices were burned")
 
-    print("3. Molt (waiting for the cycle to end)")
+    print("3. Shed (waiting for the cycle to end)")
     wait_for_cycle(contract, start_cycle + 1)
     skins_before = view(contract, "stats")["skins_minted"]
-    call(contract, p1, "molt", {}, 0)
+    call(contract, p1, "shed", {}, 0)
     skin_id = view(contract, "stats")["skins_minted"]
     check(skin_id == skins_before + 1, f"skin #{skin_id} minted")
     skin = view(contract, "skin", {"skin_id": skin_id})
@@ -145,7 +145,7 @@ def main(contract, p1, p2):
     print("5. Settlement (waiting for the auction to end)")
     wait_until_auction_ended(contract, skin_id)
     burned_before = int(view(contract, "stats")["burned_by_auction"])
-    call(contract, p1, "molt", {}, 0)
+    call(contract, p1, "shed", {}, 0)
     skin = view(contract, "skin", {"skin_id": skin_id})
     check(skin["owner_id"] == p2 and skin["auction"]["settled"], f"skin #{skin_id} handed to {p2}")
     check(int(view(contract, "stats")["burned_by_auction"]) == burned_before + raised // 2,
@@ -156,7 +156,7 @@ def main(contract, p1, p2):
         share = int(view(contract, "sculptor_claimable", {"skin_id": skin_id, "account_id": who}))
         before = balance(contract, who)
         call(contract, who, "claim_sculptor_share", {"skin_id": skin_id}, 0)
-        check(balance(contract, who) == before + share, f"{who} received {share} yocto-MOLT")
+        check(balance(contract, who) == before + share, f"{who} received {share} yocto-SHED")
 
     print("\nAll checks passed.")
 

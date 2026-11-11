@@ -19,9 +19,9 @@ function journalOf(...oldestFirst: JournalEntry[]): JournalEntry[] {
 }
 
 test("entriesAfter keeps entries strictly newer than the cursor, oldest first", () => {
-  const journal = journalOf(entry("transform", "10"), entry("transform", "20"), entry("molt", "20"), entry("bid", "30"));
+  const journal = journalOf(entry("transform", "10"), entry("transform", "20"), entry("shed", "20"), entry("bid", "30"));
   assert.deepEqual(entriesAfter(journal, 20n).map((e) => e.at_ns), ["30"]);
-  assert.deepEqual(entriesAfter(journal, 10n).map((e) => `${e.kind}@${e.at_ns}`), ["transform@20", "molt@20", "bid@30"]);
+  assert.deepEqual(entriesAfter(journal, 10n).map((e) => `${e.kind}@${e.at_ns}`), ["transform@20", "shed@20", "bid@30"]);
   assert.equal(entriesAfter(journal, 30n).length, 0);
   assert.equal(entriesAfter(journal, 0n).length, 4);
 });
@@ -88,7 +88,7 @@ function setup(state: BotState) {
 
 test("first start sets the cursor to the newest entry: no backlog post", async () => {
   const chain = new FakeChain();
-  chain.journalEntries = journalOf(entry("transform", "10"), entry("molt", "20", { skin_id: 1 }));
+  chain.journalEntries = journalOf(entry("transform", "10"), entry("shed", "20", { skin_id: 1 }));
   const state = await freshState(chain);
   assert.equal(state.cursorNs, 20n);
   const { chain: c2, publisher, announcer } = setup(state);
@@ -97,13 +97,13 @@ test("first start sets the cursor to the newest entry: no backlog post", async (
   assert.equal(publisher.posts.length, 0);
 });
 
-test("molt/settle post at once, transforms batch once per interval, others ignored", async () => {
+test("shed/settle post at once, transforms batch once per interval, others ignored", async () => {
   const { chain, publisher, announcer, advance } = setup({ cursorNs: 0n, lastBatchPostMs: 0, pendingTransforms: [] });
   const t1 = entry("transform", "10", { slot: "eyes", variant: 1, burned: "1000000000000000000000" });
   const t2 = entry("transform", "11", { slot: "eyes", variant: 0, burned: "1000000000000000000000" });
-  chain.journalEntries = journalOf(t1, t2, entry("molt", "12", { skin_id: 1, amount: "2000000000000000000000" }), entry("bid", "13"), entry("airdrop", "14"));
+  chain.journalEntries = journalOf(t1, t2, entry("shed", "12", { skin_id: 1, amount: "2000000000000000000000" }), entry("bid", "13"), entry("airdrop", "14"));
   await announcer.tick();
-  assert.deepEqual(publisher.posts.map((p) => p.kind), ["molt", "batch"]);
+  assert.deepEqual(publisher.posts.map((p) => p.kind), ["shed", "batch"]);
   assert.match(publisher.posts[1]?.text ?? "", /2 changes/);
   assert.equal(announcer.current.cursorNs, 14n);
   assert.equal(announcer.current.pendingTransforms.length, 0);
@@ -118,12 +118,12 @@ test("molt/settle post at once, transforms batch once per interval, others ignor
   // …a settle still goes out immediately…
   chain.journalEntries = journalOf(...chain.journalEntries.slice().reverse(), entry("settle", "21", { skin_id: 1, amount: "0" }));
   await announcer.tick();
-  assert.deepEqual(publisher.posts.map((p) => p.kind), ["molt", "batch", "settle"]);
+  assert.deepEqual(publisher.posts.map((p) => p.kind), ["shed", "batch", "settle"]);
 
   // …and the batch is posted once the interval has elapsed, without re-reading old entries.
   advance(20 * MINUTE_MS);
   await announcer.tick();
-  assert.deepEqual(publisher.posts.map((p) => p.kind), ["molt", "batch", "settle", "batch"]);
+  assert.deepEqual(publisher.posts.map((p) => p.kind), ["shed", "batch", "settle", "batch"]);
   assert.match(publisher.posts[3]?.text ?? "", /1 change since/);
   await announcer.tick();
   assert.equal(publisher.posts.length, 4);
@@ -131,7 +131,7 @@ test("molt/settle post at once, transforms batch once per interval, others ignor
 
 test("the cursor only moves past a block once all its entries are handled", async () => {
   const { chain, saved, announcer } = setup({ cursorNs: 0n, lastBatchPostMs: 0, pendingTransforms: [] });
-  chain.journalEntries = journalOf(entry("molt", "50", { skin_id: 1 }), entry("settle", "50", { skin_id: 0, amount: "0" }), entry("bid", "60"));
+  chain.journalEntries = journalOf(entry("shed", "50", { skin_id: 1 }), entry("settle", "50", { skin_id: 0, amount: "0" }), entry("bid", "60"));
   await announcer.tick();
   assert.deepEqual(saved.map((s) => s.cursorNs), [50n, 60n]);
 });

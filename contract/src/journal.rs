@@ -1,5 +1,5 @@
 //! Bounded onchain log of what happened, readable by any frontend without an indexer.
-//! Every entry is also emitted as a NEP-297 event (`standard: "molt"`) for indexers.
+//! Every entry is also emitted as a NEP-297 event (`standard: "shed"`) for indexers.
 
 use near_sdk::json_types::{U64, U128};
 use near_sdk::serde_json::json;
@@ -10,7 +10,7 @@ use crate::slots::Slot;
 
 /// Entries kept onchain; older ones are overwritten.
 pub const JOURNAL_CAPACITY: u32 = 64;
-const EVENT_STANDARD: &str = "molt";
+const EVENT_STANDARD: &str = "shed";
 const EVENT_VERSION: &str = "1.0.0";
 
 #[near(serializers = [json, borsh])]
@@ -18,7 +18,7 @@ const EVENT_VERSION: &str = "1.0.0";
 #[serde(rename_all = "snake_case")]
 pub enum JournalKind {
     Transform,
-    Molt,
+    Shed,
     Bid,
     Settle,
     SculptorClaim,
@@ -162,6 +162,6 @@ mod tests {
         assert!(logs[0].starts_with("EVENT_JSON:{"));
         assert!(logs[0].contains(r#""data":[{"kind":"transform""#));
         assert!(logs[0].contains(r#""event":"transform""#));
-        assert!(logs[0].contains(r#""standard":"molt""#));
+        assert!(logs[0].contains(r#""standard":"shed""#));
     }
 }

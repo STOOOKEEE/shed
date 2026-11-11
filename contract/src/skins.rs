@@ -19,9 +19,9 @@ use near_sdk::serde_json;
 use near_sdk::{AccountId, Promise, PromiseOrValue, env, near, require};
 
 use crate::face::{FACE_LOCKED, is_face};
-use crate::render::{render_svg, svg_data_uri};
 use crate::slots::Genome;
-use crate::{Molt, MoltExt};
+use crate::{Shed, ShedExt};
+use shed_art::{render_svg, svg_data_uri};
 
 const NANOS_PER_MILLI: u64 = 1_000_000;
 
@@ -29,15 +29,15 @@ pub(crate) fn token_id(skin_id: u32) -> TokenId {
     skin_id.to_string()
 }
 
-impl Molt {
+impl Shed {
     /// Mints skin `skin_id`, owned by the contract while its auction runs. Storage is paid by
     /// the contract account.
     pub(crate) fn mint_skin(&mut self, skin_id: u32, cycle: u32, genome: &Genome) {
         let svg = render_svg(genome);
         let metadata = TokenMetadata {
-            title: Some(format!("MOLT skin #{skin_id}")),
+            title: Some(format!("SHED skin #{skin_id}")),
             description: Some(format!(
-                "The look of the MOLT mascot at the end of cycle {cycle}, shed and frozen onchain."
+                "The look of the SHED mascot at the end of cycle {cycle}, shed and frozen onchain."
             )),
             media: Some(svg_data_uri(&svg)),
             issued_at: Some((env::block_timestamp() / NANOS_PER_MILLI).to_string()),
@@ -101,7 +101,7 @@ impl Molt {
 }
 
 #[near]
-impl NonFungibleTokenCore for Molt {
+impl NonFungibleTokenCore for Shed {
     #[payable]
     fn nft_transfer(
         &mut self,
@@ -137,7 +137,7 @@ impl NonFungibleTokenCore for Molt {
 }
 
 #[near]
-impl NonFungibleTokenResolver for Molt {
+impl NonFungibleTokenResolver for Shed {
     #[private]
     fn nft_resolve_transfer(
         &mut self,
@@ -156,7 +156,7 @@ impl NonFungibleTokenResolver for Molt {
 }
 
 #[near]
-impl NonFungibleTokenApproval for Molt {
+impl NonFungibleTokenApproval for Shed {
     #[payable]
     fn nft_approve(
         &mut self,
@@ -190,7 +190,7 @@ impl NonFungibleTokenApproval for Molt {
 }
 
 #[near]
-impl NonFungibleTokenEnumeration for Molt {
+impl NonFungibleTokenEnumeration for Shed {
     fn nft_total_supply(&self) -> U128 {
         self.skin_nft.nft_total_supply()
     }
@@ -222,11 +222,11 @@ impl NonFungibleTokenEnumeration for Molt {
 }
 
 #[near]
-impl NonFungibleTokenMetadataProvider for Molt {
+impl NonFungibleTokenMetadataProvider for Shed {
     fn nft_metadata(&self) -> NFTContractMetadata {
         NFTContractMetadata {
             spec: NFT_METADATA_SPEC.to_string(),
-            name: "MOLT skins".to_string(),
+            name: "SHED skins".to_string(),
             symbol: "SKIN".to_string(),
             icon: None,
             base_uri: None,

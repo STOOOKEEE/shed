@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { log } from "./log.js";
 import type { XClient } from "./x.js";
 
-export type PostKind = "molt" | "settle" | "batch";
+export type PostKind = "shed" | "settle" | "batch";
 
 export interface Post {
   kind: PostKind;

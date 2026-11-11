@@ -1,6 +1,6 @@
 // Every minted skin, newest first, with the signed-in sculptor's claimable share.
 import { actionTarget, escapeHtml, memoRender, svgImage } from "../dom";
-import { formatAccount, formatMolt } from "../format";
+import { formatAccount, formatShed } from "../format";
 import type { GalleryData } from "../store";
 import type { Skin } from "../contract/types";
 
@@ -22,7 +22,7 @@ function claimLine(skin: Skin, claimable: string | undefined): string {
   if (claimable === undefined || BigInt(claimable) === 0n) return "";
   return `
     <div class="claim">
-      <span>Your sculptor share: <strong>${formatMolt(claimable)} MOLT</strong></span>
+      <span>Your sculptor share: <strong>${formatShed(claimable)} SHED</strong></span>
       <button type="button" class="btn btn-primary" data-action="claim" data-skin-id="${skin.skin_id}">Claim</button>
     </div>`;
 }
@@ -66,7 +66,7 @@ export function createGalleryPanel(root: HTMLElement, handlers: GalleryHandlers)
     render: memoRender((data: GalleryViewData) => {
       root.innerHTML = data.gallery.skins.length
         ? `<div class="cards cards-small">${data.gallery.skins.map((s) => card(s, data)).join("")}</div>${pager(data.gallery)}`
-        : `<p class="placeholder">No skin yet. The first one is minted when the first sculpted cycle molts.</p>`;
+        : `<p class="placeholder">No skin yet. The first one is minted when the first sculpted sheds.</p>`;
     }),
   };
 }

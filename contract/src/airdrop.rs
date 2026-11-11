@@ -6,10 +6,10 @@ use near_sdk::{env, near, require};
 
 use crate::journal::{JournalEntry, JournalKind};
 use crate::storage::{self, AIRDROP_CLAIM_STORAGE_BYTES, bytes_cost};
-use crate::{Molt, MoltExt};
+use crate::{Shed, ShedExt};
 
 #[near]
-impl Molt {
+impl Shed {
     /// Sends `airdrop_amount` to the caller, once. The caller must be storage-registered and
     /// attach `airdrop_deposit()` for the claim record (the excess is refunded).
     #[payable]

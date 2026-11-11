@@ -1,6 +1,6 @@
 // Open auctions: one card per skin with a bid form.
 import { actionTarget, escapeHtml, memoRender, svgImage } from "../dom";
-import { formatAccount, formatBps, formatMolt, nsToMs } from "../format";
+import { formatAccount, formatBps, formatShed, nsToMs } from "../format";
 import type { AuctionView } from "../store";
 import { chainNowMs } from "../near/clock";
 import { countdownHtml } from "./countdown";
@@ -13,7 +13,7 @@ export interface AuctionsData {
 
 export interface AuctionsHandlers {
   onBid(skinId: number, amountText: string): void;
-  onMolt(): void;
+  onShed(): void;
 }
 
 export interface AuctionsPanel {
@@ -29,9 +29,9 @@ function bidForm(view: AuctionView, canSign: boolean): string {
   const { auction } = view;
   return `
     <form class="bid-form" data-skin-id="${auction.skin_id}">
-      <label class="sr-only" for="bid-${auction.skin_id}">Bid in MOLT</label>
+      <label class="sr-only" for="bid-${auction.skin_id}">Bid in SHED</label>
       <input id="bid-${auction.skin_id}" name="amount" inputmode="decimal" autocomplete="off"
-        placeholder="${formatMolt(auction.min_next_bid)}" ${canSign ? "" : "disabled"} />
+        placeholder="${formatShed(auction.min_next_bid)}" ${canSign ? "" : "disabled"} />
       <button type="submit" class="btn btn-primary" ${canSign ? "" : "disabled"}>Bid</button>
     </form>
     ${canSign ? "" : `<p class="muted small">Sign in to bid.</p>`}`;
@@ -40,11 +40,11 @@ function bidForm(view: AuctionView, canSign: boolean): string {
 function card({ view, ended }: CardView, canSign: boolean): string {
   const { auction, skin } = view;
   const leader = auction.highest_bid && auction.highest_bidder
-    ? `${formatMolt(auction.highest_bid)} MOLT <span class="muted">by ${escapeHtml(formatAccount(auction.highest_bidder))}</span>`
+    ? `${formatShed(auction.highest_bid)} SHED <span class="muted">by ${escapeHtml(formatAccount(auction.highest_bidder))}</span>`
     : `<span class="muted">No bids yet — the top sculptor gets it for free</span>`;
   const action = ended
     ? `<p class="badge badge-alert">Ended — awaiting settlement</p>
-       <button type="button" class="btn" data-action="molt" ${canSign ? "" : "disabled"}>Settle (molt)</button>`
+       <button type="button" class="btn" data-action="shed" ${canSign ? "" : "disabled"}>Settle (shed)</button>`
     : bidForm(view, canSign);
   return `
     <article class="card">
@@ -54,7 +54,7 @@ function card({ view, ended }: CardView, canSign: boolean): string {
         <dl class="facts">
           <dt>Highest bid</dt><dd>${leader}</dd>
           <dt>Ends in</dt><dd>${countdownHtml(auction.ends_at_ns, "ended")}</dd>
-          <dt>Min next bid</dt><dd>${formatMolt(auction.min_next_bid)} MOLT</dd>
+          <dt>Min next bid</dt><dd>${formatShed(auction.min_next_bid)} SHED</dd>
         </dl>
         ${action}
       </div>
@@ -87,7 +87,7 @@ export function createAuctionsPanel(root: HTMLElement, handlers: AuctionsHandler
     if (Number.isInteger(skinId) && amount instanceof HTMLInputElement) handlers.onBid(skinId, amount.value);
   });
   root.addEventListener("click", (event) => {
-    if (actionTarget(event, root)?.dataset["action"] === "molt") handlers.onMolt();
+    if (actionTarget(event, root)?.dataset["action"] === "shed") handlers.onShed();
   });
 
   return {

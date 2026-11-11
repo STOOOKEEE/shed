@@ -1,10 +1,10 @@
-# MOLT — the memecoin that sheds its skins
+# SHED — the memecoin that sheds its skins
 
 NEAR HACKATHON 2026 · track **Memecoins With Mechanics** (`memecoins`).
 
-$MOLT is a NEP-141 memecoin with a public mascot: a 32×32 pixel-art lobster. Holders **burn $MOLT to change one of
+$SHED is a NEP-141 memecoin with a public mascot: a 32×32 pixel-art lobster. Holders **burn $SHED to change one of
 its traits**. At the end of each cycle, the mascot **molts**: its final look becomes a unique NFT (a *skin*) whose
-image is drawn by the contract itself. The skin is **auctioned in $MOLT**. Half of the winning bid is burned and
+image is drawn by the contract itself. The skin is **auctioned in $SHED**. Half of the winning bid is burned and
 the other half goes to the holders who sculpted that cycle, in proportion to what they burned.
 
 The whole mechanic runs in one contract. It has no backend, no admin key and no setter: every parameter is fixed
@@ -24,7 +24,7 @@ stacks the layers and emits an SVG, so the art never depends on a server or IPFS
 
 ## The problem
 
-Most memecoins have nothing to do: the joke lives on a chart and the "community" can only buy or sell. MOLT gives
+Most memecoins have nothing to do: the joke lives on a chart and the "community" can only buy or sell. SHED gives
 the community one onchain ritual with consequences:
 
 - the supply only goes down, and how fast depends on what the community does;
@@ -33,7 +33,7 @@ the community one onchain ritual with consequences:
 
 ## The rule
 
-1. **Fixed supply.** 1,000,000,000 MOLT are minted once at launch. Nothing mints afterwards.
+1. **Fixed supply.** 1,000,000,000 SHED are minted once at launch. Nothing mints afterwards.
 2. **Sculpt.** During a cycle, `transform(slot, variant)` burns the slot's current price from the caller and
    changes that trait. There are 6 slots (`background`, `shell`, `pattern`, `eyes`, `claws`, `headgear`) with a
    fixed list of variants each: no uploads, no free text, so nothing to moderate. The caller also attaches the NEAR
@@ -45,14 +45,14 @@ the community one onchain ritual with consequences:
    previous face in the same transaction. Only one face exists at a time: it belongs to whoever changed the mascot
    last and burns the moment someone else does. It cannot be transferred or approved: it is a title, not an asset,
    and its image is always the live mascot.
-4. **Molt.** Cycles run on a fixed schedule. When one ends, its final look is frozen into skin #n (NEP-171, SVG in
+4. **Shed.** Cycles run on a fixed schedule. When one ends, its final look is frozen into skin #n (NEP-171, SVG in
    the metadata) and the mascot carries that look into the next cycle. A cycle with no transformation makes no skin.
-5. **Auction.** Each skin is auctioned in $MOLT for one cycle. Bids are escrowed by the contract and outbid tokens
+5. **Auction.** Each skin is auctioned in $SHED for one cycle. Bids are escrowed by the contract and outbid tokens
    are refunded immediately. A bid in the last quarter of the auction pushes the end back.
 6. **Settlement.** 50 % of the winning bid is burned. The rest is claimable by that cycle's sculptors, pro-rata to
    what they burned (`claim_sculptor_share`). With no bid, the cycle's top sculptor gets the skin.
-7. **No keeper.** Every mechanic call (`transform`, `bid`, `claim_*`, `molt`) first catches up on time: it settles
-   finished auctions and closes finished cycles. `molt()` does only that and anyone can call it.
+7. **No keeper.** Every mechanic call (`transform`, `bid`, `claim_*`, `shed`) first catches up on time: it settles
+   finished auctions and closes finished cycles. `shed()` does only that and anyone can call it.
 
 Full specification and JSON API: [docs/design.md](docs/design.md).
 
@@ -67,24 +67,24 @@ Node 20+.
 1. `cd contract && cargo run --example local_demo`
    → you see a sandbox start, the contract deploy, 3 accounts claim the airdrop and sculpt, skin #1 go to
    auction with 2 bids, and a 3-change fight over the shell. The last line prints the command for the next step.
-2. In a second terminal: `cd web && npm install && VITE_CONTRACT_ID=molt.sandbox VITE_NODE_URL=<printed url> npm run dev`,
+2. In a second terminal: `cd web && npm install && VITE_CONTRACT_ID=shed.sandbox VITE_NODE_URL=<printed url> npm run dev`,
    then open http://localhost:5173.
    → you see the live mascot (Sunset background, Ocean Blue shell, Chef Hat…), cycle #2 with the shell at
-   33,750 MOLT after 3 changes (10,000 × 1.5³), skin #1 on auction with a 30,000 MOLT bid from `alice.sandbox`,
-   107,500 MOLT burned by sculpting, and the journal of every burn and bid.
+   33,750 SHED after 3 changes (10,000 × 1.5³), skin #1 on auction with a 30,000 SHED bid from `alice.sandbox`,
+   107,500 SHED burned by sculpting, and the journal of every burn and bid.
 3. Hover any variant in **Sculpt**.
    → the preview next to the mascot comes from the contract's `preview_svg` view.
-4. Wait for the countdown (10-minute cycles). → **Molt pending** appears. The sandbox is read-only from the
-   browser; the end-to-end test below exercises the molt and settlement transactions.
+4. Wait for the countdown (10-minute cycles). → **Shed pending** appears. The sandbox is read-only from the
+   browser; the end-to-end test below exercises the shed and settlement transactions.
 
 ### B. Contract tests
 
 1. `cd contract && cargo test`
    → 100 unit tests: pricing, schedule, sprite sheets and rendering (every shape combination within the size
    budget), config validation, journal, every contract rule (burns, price
-   growth, molt, auction, anti-snipe, settlement, pro-rata claims), storage budgets measured against the worst case
+   growth, shed, auction, anti-snipe, settlement, pro-rata claims), storage budgets measured against the worst case
    (largest SVG, 64-character accounts), and guards (contract account, unregistering bidders, raising one's own bid). Then
-   `full_molt_cycle_on_sandbox` runs on a real sandbox with the release wasm: airdrop → 3 transforms → molt →
+   `full_molt_cycle_on_sandbox` runs on a real sandbox with the release wasm: airdrop → 3 transforms → shed →
    2 bids with refund → settlement burn → sculptor claim, checking `ft_total_supply` at the end.
 2. `cargo run --example simulate`
    → the 60-cycle supply simulation used to choose the parameters ([docs/simulation.md](docs/simulation.md)).
@@ -95,27 +95,27 @@ Deploy with [`scripts/deploy-testnet.sh`](scripts/deploy-testnet.sh) (10-minute 
 [`scripts/lock-contract.sh`](scripts/lock-contract.sh), which deletes every access key on the contract account.
 Run the web app with `VITE_CONTRACT_ID=<contract>.testnet npm run dev` and sign in with a testnet wallet:
 
-1. **Claim airdrop** → one transaction registers storage and claims 100,000 MOLT (≈0.005 NEAR of storage).
+1. **Claim airdrop** → one transaction registers storage and claims 100,000 SHED (≈0.005 NEAR of storage).
 2. **Sculpt**: pick a variant and confirm → your balance drops by the slot price, the supply panel shows the burn,
    and the next change of that slot costs ×1.5. If you are first in the cycle, the wallet asks ≈0.074 NEAR: the
    storage of the skin your cycle will become.
-3. After the cycle ends, **Trigger molt** → skin #n shows up in **Auctions** and in the gallery.
+3. After the cycle ends, **Trigger shed** → skin #n shows up in **Auctions** and in the gallery.
 4. **Bid** → your tokens are escrowed and the previous bidder is refunded.
-5. After the auction, **Trigger molt** again → the skin moves to the winner, 50 % of the bid is burned, and the
+5. After the auction, **Trigger shed** again → the skin moves to the winner, 50 % of the bid is burned, and the
    sculptors see **Claim share** in the gallery.
 
 ## Parameters (fixed at launch)
 
 | parameter | testnet demo | intended mainnet |
 |---|---|---|
-| total supply | 1,000,000,000 MOLT | same |
+| total supply | 1,000,000,000 SHED | same |
 | cycle / auction duration | 10 min / 10 min | 24 h / 24 h |
 | anti-snipe window | 2.5 min | 6 h |
-| base transform price | 10,000 MOLT | same |
+| base transform price | 10,000 SHED | same |
 | price growth per change of a slot | ×1.5 | same |
-| minimum bid / increment | 5,000 MOLT / +5 % | same |
+| minimum bid / increment | 5,000 SHED / +5 % | same |
 | share of winning bid burned | 50 % | same |
-| airdrop | 100,000 MOLT per account, 100M pool | 0 (disabled) |
+| airdrop | 100,000 SHED per account, 100M pool | 0 (disabled) |
 
 The base price was chosen from the [simulation](docs/simulation.md): a steady community of 25 sculptors a day
 burns about 12 % of supply in 60 days, a quiet one under 1 %. Because each slot's price climbs ×1.5 per change,

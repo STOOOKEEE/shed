@@ -8,11 +8,11 @@ use crate::slots::Slot;
 
 const FUNDS: u128 = 10_000;
 /// When the first skin is minted in these scenarios.
-const MOLT_TIME: u64 = GENESIS + CYCLE;
-const AUCTION_END: u64 = MOLT_TIME + AUCTION;
+const SHED_TIME: u64 = GENESIS + CYCLE;
+const AUCTION_END: u64 = SHED_TIME + AUCTION;
 
 struct Scene {
-    contract: Molt,
+    contract: Shed,
     alice: AccountId,
     bob: AccountId,
     carol: AccountId,
@@ -29,8 +29,8 @@ fn scene() -> Scene {
     sculpt(&mut contract, &alice, GENESIS + 2, Slot::Eyes, 1);
     sculpt(&mut contract, &alice, GENESIS + 3, Slot::Claws, 1);
     sculpt(&mut contract, &bob, GENESIS + 4, Slot::Pattern, 1);
-    call_as(&bob, MOLT_TIME, 0);
-    contract.molt();
+    call_as(&bob, SHED_TIME, 0);
+    contract.shed();
     Scene {
         contract,
         alice,
@@ -39,21 +39,21 @@ fn scene() -> Scene {
     }
 }
 
-fn bid(contract: &mut Molt, who: &AccountId, now: u64, amount: u128) {
+fn bid(contract: &mut Shed, who: &AccountId, now: u64, amount: u128) {
     call_as(who, now, 1);
     contract.bid(1, U128(amount));
 }
 
-fn settle_at(contract: &mut Molt, now: u64) {
+fn settle_at(contract: &mut Shed, now: u64) {
     call_as(&account("keeper"), now, 0);
-    contract.molt();
+    contract.shed();
 }
 
 #[test]
 fn bid_escrows_tokens_in_the_contract() {
     let mut s = scene();
     let escrow_before = balance(&s.contract, &contract_id());
-    bid(&mut s.contract, &s.carol, MOLT_TIME + 1, 500);
+    bid(&mut s.contract, &s.carol, SHED_TIME + 1, 500);
     assert_eq!(balance(&s.contract, &s.carol), FUNDS - 500);
     assert_eq!(balance(&s.contract, &contract_id()), escrow_before + 500);
     let auction = s.contract.skin(1).unwrap().auction;
@@ -65,8 +65,8 @@ fn bid_escrows_tokens_in_the_contract() {
 #[test]
 fn outbid_tokens_are_refunded_immediately() {
     let mut s = scene();
-    bid(&mut s.contract, &s.carol, MOLT_TIME + 1, 500);
-    bid(&mut s.contract, &s.bob, MOLT_TIME + 2, 525);
+    bid(&mut s.contract, &s.carol, SHED_TIME + 1, 500);
+    bid(&mut s.contract, &s.bob, SHED_TIME + 2, 525);
     assert_eq!(balance(&s.contract, &s.carol), FUNDS);
 }
 
@@ -74,15 +74,15 @@ fn outbid_tokens_are_refunded_immediately() {
 #[should_panic(expected = "Bid too low")]
 fn first_bid_must_reach_the_minimum() {
     let mut s = scene();
-    bid(&mut s.contract, &s.carol, MOLT_TIME + 1, MIN_BID - 1);
+    bid(&mut s.contract, &s.carol, SHED_TIME + 1, MIN_BID - 1);
 }
 
 #[test]
 #[should_panic(expected = "Bid too low")]
 fn next_bid_must_beat_the_increment() {
     let mut s = scene();
-    bid(&mut s.contract, &s.carol, MOLT_TIME + 1, 500);
-    bid(&mut s.contract, &s.bob, MOLT_TIME + 2, 524);
+    bid(&mut s.contract, &s.carol, SHED_TIME + 1, 500);
+    bid(&mut s.contract, &s.bob, SHED_TIME + 2, 524);
 }
 
 #[test]
@@ -96,7 +96,7 @@ fn bids_after_the_end_are_rejected() {
 #[should_panic(expected = "Unknown skin")]
 fn bids_on_unknown_skins_are_rejected() {
     let mut s = scene();
-    call_as(&s.carol, MOLT_TIME + 1, 1);
+    call_as(&s.carol, SHED_TIME + 1, 1);
     s.contract.bid(9, U128(500));
 }
 
@@ -104,7 +104,7 @@ fn bids_on_unknown_skins_are_rejected() {
 #[should_panic(expected = "Requires attached deposit of exactly 1 yoctoNEAR")]
 fn bid_requires_one_yocto() {
     let mut s = scene();
-    call_as(&s.carol, MOLT_TIME + 1, 0);
+    call_as(&s.carol, SHED_TIME + 1, 0);
     s.contract.bid(1, U128(500));
 }
 
@@ -122,7 +122,7 @@ fn a_late_bid_extends_the_auction() {
 #[test]
 fn settlement_hands_the_skin_to_the_winner_and_burns_half() {
     let mut s = scene();
-    bid(&mut s.contract, &s.carol, MOLT_TIME + 1, 1_000);
+    bid(&mut s.contract, &s.carol, SHED_TIME + 1, 1_000);
     let supply_before = s.contract.ft_total_supply().0;
     settle_at(&mut s.contract, AUCTION_END);
     let skin = s.contract.skin(1).unwrap();
@@ -138,7 +138,7 @@ fn settlement_hands_the_skin_to_the_winner_and_burns_half() {
 #[test]
 fn sculptors_share_the_rest_pro_rata() {
     let mut s = scene();
-    bid(&mut s.contract, &s.carol, MOLT_TIME + 1, 1_000);
+    bid(&mut s.contract, &s.carol, SHED_TIME + 1, 1_000);
     settle_at(&mut s.contract, AUCTION_END);
     assert_eq!(s.contract.sculptor_claimable(1, s.alice.clone()), U128(375));
     call_as(&s.alice, AUCTION_END + 1, 0);
@@ -153,7 +153,7 @@ fn sculptors_share_the_rest_pro_rata() {
 #[should_panic(expected = "Nothing to claim")]
 fn a_share_cannot_be_claimed_twice() {
     let mut s = scene();
-    bid(&mut s.contract, &s.carol, MOLT_TIME + 1, 1_000);
+    bid(&mut s.contract, &s.carol, SHED_TIME + 1, 1_000);
     settle_at(&mut s.contract, AUCTION_END);
     call_as(&s.alice, AUCTION_END + 1, 0);
     s.contract.claim_sculptor_share(1);
@@ -164,7 +164,7 @@ fn a_share_cannot_be_claimed_twice() {
 #[should_panic(expected = "Nothing to claim")]
 fn non_sculptors_have_nothing_to_claim() {
     let mut s = scene();
-    bid(&mut s.contract, &s.carol, MOLT_TIME + 1, 1_000);
+    bid(&mut s.contract, &s.carol, SHED_TIME + 1, 1_000);
     settle_at(&mut s.contract, AUCTION_END);
     call_as(&s.carol, AUCTION_END + 1, 0);
     s.contract.claim_sculptor_share(1);
@@ -174,7 +174,7 @@ fn non_sculptors_have_nothing_to_claim() {
 #[should_panic(expected = "Auction not settled yet")]
 fn shares_wait_for_settlement() {
     let mut s = scene();
-    call_as(&s.alice, MOLT_TIME + 1, 0);
+    call_as(&s.alice, SHED_TIME + 1, 0);
     s.contract.claim_sculptor_share(1);
 }
 

@@ -10,7 +10,7 @@ use crate::slots::Slot;
 const FUNDS: u128 = 10_000;
 
 /// Alice sculpts cycle 1; at `GENESIS + CYCLE` skin 1 goes to auction. Bob and Carol are funded.
-fn auction_open() -> (Molt, AccountId, AccountId) {
+fn auction_open() -> (Shed, AccountId, AccountId) {
     let mut contract = new_contract();
     let (alice, bob, carol) = (account("alice"), account("bob"), account("carol"));
     for who in [&alice, &bob, &carol] {
@@ -18,7 +18,7 @@ fn auction_open() -> (Molt, AccountId, AccountId) {
     }
     sculpt(&mut contract, &alice, GENESIS + 1, Slot::Shell, 1);
     call_as(&alice, GENESIS + CYCLE, 0);
-    contract.molt();
+    contract.shed();
     (contract, bob, carol)
 }
 
@@ -87,10 +87,10 @@ fn raising_your_own_bid_escrows_only_the_difference() {
 }
 
 #[test]
-fn molt_is_pending_only_when_a_skin_is_due() {
+fn shed_is_pending_only_when_a_skin_is_due() {
     let mut contract = new_contract();
     call_as(&holder(), GENESIS + 2 * CYCLE, 0);
-    assert!(!contract.mascot().molt_pending);
+    assert!(!contract.mascot().shed_pending);
     let alice = account("alice");
     fund(&mut contract, &alice, FUNDS, GENESIS + 2 * CYCLE);
     sculpt(
@@ -101,5 +101,5 @@ fn molt_is_pending_only_when_a_skin_is_due() {
         2,
     );
     call_as(&holder(), GENESIS + 3 * CYCLE, 0);
-    assert!(contract.mascot().molt_pending);
+    assert!(contract.mascot().shed_pending);
 }

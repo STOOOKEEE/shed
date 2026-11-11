@@ -1,6 +1,6 @@
 // Post texts. English, factual numbers, always within X's 280 weighted characters.
 
-import { capitalize, formatMolt, formatUtc, shortAccount, X_MAX_WEIGHT, X_URL_WEIGHT, xWeight } from "./format.js";
+import { capitalize, formatShed, formatUtc, shortAccount, X_MAX_WEIGHT, X_URL_WEIGHT, xWeight } from "./format.js";
 import type { CatalogSlot, JournalEntry, Skin } from "./types.js";
 
 const BPS_PER_PERCENT = 100;
@@ -27,13 +27,13 @@ export function variantName(catalog: readonly CatalogSlot[], slot: string, varia
   return catalog.find((entry) => entry.slot === slot)?.variants[variant] ?? `#${variant}`;
 }
 
-export function composeMolt(entry: JournalEntry, skin: Skin, auctionBurnBps: number, ctx: ComposeContext): string {
+export function composeShed(entry: JournalEntry, skin: Skin, auctionBurnBps: number, ctx: ComposeContext): string {
   const burnPercent = auctionBurnBps / BPS_PER_PERCENT;
   const lines = [
     `🦞 Cycle ${entry.cycle} is over. Skin #${skin.skin_id} is frozen and up for auction.`,
     "",
-    `${formatMolt(entry.amount)} $MOLT burned to sculpt this look.`,
-    `Bids in $MOLT close ${formatUtc(skin.auction.ends_at_ns)}. ${burnPercent}% of the winning bid burns.`,
+    `${formatShed(entry.amount)} $SHED burned to sculpt this look.`,
+    `Bids in $SHED close ${formatUtc(skin.auction.ends_at_ns)}. ${burnPercent}% of the winning bid burns.`,
   ];
   return finish(lines.join("\n"), ctx);
 }
@@ -48,9 +48,9 @@ export function composeSettle(entry: JournalEntry, skin: Skin, ctx: ComposeConte
     );
   }
   const burned = BigInt(entry.burned);
-  const lines = [`🔨 Skin #${skin.skin_id} (cycle ${skin.cycle}) sold to ${owner} for ${formatMolt(amount)} $MOLT.`, ""];
-  if (burned > 0n) lines.push(`🔥 ${formatMolt(burned)} $MOLT burned forever.`);
-  if (amount > burned) lines.push(`${formatMolt(amount - burned)} $MOLT goes to the cycle's sculptors.`);
+  const lines = [`🔨 Skin #${skin.skin_id} (cycle ${skin.cycle}) sold to ${owner} for ${formatShed(amount)} $SHED.`, ""];
+  if (burned > 0n) lines.push(`🔥 ${formatShed(burned)} $SHED burned forever.`);
+  if (amount > burned) lines.push(`${formatShed(amount - burned)} $SHED goes to the cycle's sculptors.`);
   return finish(lines.join("\n"), ctx);
 }
 
@@ -74,7 +74,7 @@ export function composeBatch(
   const total = transforms.reduce((sum, entry) => sum + BigInt(entry.burned), 0n);
   const count = transforms.length;
   const header = `🦞 The lobster is shedding. ${count} change${count === 1 ? "" : "s"} since the last update:`;
-  const footer = [`🔥 ${formatMolt(total)} $MOLT burned.`];
+  const footer = [`🔥 ${formatShed(total)} $SHED burned.`];
   if (faceOwner) footer.push(`Face NFT now held by ${shortAccount(faceOwner)}.`);
   const changes = transforms.map((entry) => describeTransform(entry, catalog));
 

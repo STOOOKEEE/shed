@@ -20,7 +20,7 @@ fn launch_rejects_invalid_parameters() {
     let mut config = valid_config();
     config.total_supply = U128(0);
     call_as(&contract_id(), GENESIS, 0);
-    let _ = Molt::new(config);
+    let _ = Shed::new(config, None);
 }
 
 #[test]
@@ -32,10 +32,10 @@ fn config_view_exposes_parameters_and_genesis() {
 }
 
 #[test]
-fn token_metadata_is_molt_with_18_decimals() {
+fn token_metadata_is_shed_with_18_decimals() {
     let contract = new_contract();
     let metadata = contract.ft_metadata();
-    assert_eq!(metadata.symbol, "MOLT");
+    assert_eq!(metadata.symbol, "SHED");
     assert_eq!(metadata.decimals, 18);
 }
 

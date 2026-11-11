@@ -41,7 +41,7 @@ async function run(config: BotConfig, stop: AbortSignal): Promise<void> {
     },
     state,
   );
-  log.info("molt-bot started", {
+  log.info("shed-bot started", {
     contract: config.contractId,
     dry_run: config.dryRun,
     poll_seconds: config.pollSeconds,
@@ -60,7 +60,7 @@ async function run(config: BotConfig, stop: AbortSignal): Promise<void> {
       if (!stop.aborted) throw error;
     });
   }
-  log.info("molt-bot stopped", { cursor_ns: announcer.current.cursorNs.toString() });
+  log.info("shed-bot stopped", { cursor_ns: announcer.current.cursorNs.toString() });
 }
 
 async function main(): Promise<void> {

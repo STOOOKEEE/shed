@@ -1,6 +1,6 @@
-# MOLT web app
+# SHED web app
 
-Single-page front end for the MOLT contract (Vite + vanilla TypeScript).
+Single-page front end for the SHED contract (Vite + vanilla TypeScript).
 Views go straight to NEAR RPC with `near-api-js`; signing goes through `@hot-labs/near-connect`.
 
 ## Install
@@ -15,7 +15,7 @@ Copy `.env.example` to `.env` and set:
 
 | variable | required | meaning |
 | --- | --- | --- |
-| `VITE_CONTRACT_ID` | yes | account id of the deployed MOLT contract |
+| `VITE_CONTRACT_ID` | yes | account id of the deployed SHED contract |
 | `VITE_NETWORK` | no | `testnet` (default) or `mainnet` |
 | `VITE_NODE_URL` | no | custom RPC, e.g. `http://127.0.0.1:3030` for a local sandbox. Enables read-only mode (no wallet). |
 | `VITE_REPO_URL` | no | public repo URL, used for the README / rules links in the footer |

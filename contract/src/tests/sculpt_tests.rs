@@ -4,19 +4,19 @@ use near_sdk::json_types::U128;
 
 use super::*;
 use crate::journal::JournalKind;
-use crate::render::render_svg;
 use crate::slots::Slot;
+use shed_art::render_svg;
 
 const FUNDS: u128 = 10_000;
 
-fn funded(name: &str) -> (Molt, AccountId) {
+fn funded(name: &str) -> (Shed, AccountId) {
     let mut contract = new_contract();
     let who = account(name);
     fund(&mut contract, &who, FUNDS, GENESIS);
     (contract, who)
 }
 
-fn transform(contract: &mut Molt, who: &AccountId, now: u64, slot: Slot, variant: u8) -> u128 {
+fn transform(contract: &mut Shed, who: &AccountId, now: u64, slot: Slot, variant: u8) -> u128 {
     sculpt(contract, who, now, slot, variant)
 }
 
@@ -113,12 +113,12 @@ fn contributions_track_burns_per_cycle() {
 }
 
 #[test]
-fn mascot_view_flags_a_pending_molt() {
+fn mascot_view_flags_a_pending_shed() {
     let (mut contract, alice) = funded("alice");
     transform(&mut contract, &alice, GENESIS + 1, Slot::Shell, 3);
     call_as(&alice, GENESIS + CYCLE + 5, 0);
     let mascot = contract.mascot();
-    assert!(mascot.molt_pending);
+    assert!(mascot.shed_pending);
     assert_eq!(mascot.cycle, 2);
     assert_eq!(mascot.slot_prices.shell, U128(BASE_PRICE));
     assert_eq!(mascot.cycle_ends_at_ns.0, GENESIS + 2 * CYCLE);
@@ -128,15 +128,15 @@ fn mascot_view_flags_a_pending_molt() {
 fn cycle_end_freezes_the_look_into_a_skin_held_in_auction() {
     let (mut contract, alice) = funded("alice");
     transform(&mut contract, &alice, GENESIS + 1, Slot::Headgear, 4);
-    let molt_time = GENESIS + CYCLE + 5;
-    call_as(&alice, molt_time, 0);
-    assert!(contract.molt());
+    let shed_time = GENESIS + CYCLE + 5;
+    call_as(&alice, shed_time, 0);
+    assert!(contract.shed());
 
     let skin = contract.skin(1).unwrap();
     assert_eq!(skin.cycle, 1);
     assert_eq!(skin.genome.headgear, 4);
     assert_eq!(skin.owner_id, contract_id());
-    assert_eq!(skin.auction.ends_at_ns.0, molt_time + AUCTION);
+    assert_eq!(skin.auction.ends_at_ns.0, shed_time + AUCTION);
     assert!(!skin.auction.settled);
     assert_eq!(contract.auctions().len(), 1);
 
@@ -150,7 +150,7 @@ fn the_next_cycle_starts_from_the_last_look() {
     let (mut contract, alice) = funded("alice");
     transform(&mut contract, &alice, GENESIS + 1, Slot::Headgear, 4);
     call_as(&alice, GENESIS + CYCLE + 5, 0);
-    contract.molt();
+    contract.shed();
     assert_eq!(contract.mascot().genome.headgear, 4);
 }
 
@@ -158,15 +158,15 @@ fn the_next_cycle_starts_from_the_last_look() {
 fn a_quiet_cycle_mints_no_skin() {
     let mut contract = new_contract();
     call_as(&holder(), GENESIS + 3 * CYCLE, 0);
-    assert!(contract.molt());
+    assert!(contract.shed());
     assert_eq!(contract.stats().skins_minted, 0);
     assert!(contract.skin(1).is_none());
     call_as(&holder(), GENESIS + 3 * CYCLE + 1, 0);
-    assert!(!contract.molt());
+    assert!(!contract.shed());
 }
 
 #[test]
-fn molt_is_triggered_by_any_later_transform() {
+fn shed_is_triggered_by_any_later_transform() {
     let (mut contract, alice) = funded("alice");
     transform(&mut contract, &alice, GENESIS + 1, Slot::Shell, 1);
     transform(&mut contract, &alice, GENESIS + CYCLE + 1, Slot::Shell, 2);
@@ -192,13 +192,13 @@ fn catalog_lists_every_slot_with_names() {
 }
 
 #[test]
-fn journal_records_transforms_and_molts_newest_first() {
+fn journal_records_transforms_and_sheds_newest_first() {
     let (mut contract, alice) = funded("alice");
     transform(&mut contract, &alice, GENESIS + 1, Slot::Shell, 1);
     call_as(&alice, GENESIS + CYCLE, 0);
-    contract.molt();
+    contract.shed();
     let kinds: Vec<JournalKind> = contract.journal(10).iter().map(|e| e.kind).collect();
-    assert_eq!(kinds, vec![JournalKind::Molt, JournalKind::Transform]);
+    assert_eq!(kinds, vec![JournalKind::Shed, JournalKind::Transform]);
     let transform_entry = &contract.journal(10)[1];
     assert_eq!(transform_entry.account_id, Some(alice));
     assert_eq!(transform_entry.burned, U128(BASE_PRICE));

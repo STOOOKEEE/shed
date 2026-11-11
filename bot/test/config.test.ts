@@ -3,9 +3,9 @@ import { test } from "node:test";
 import { ConfigError, loadConfig } from "../src/config.js";
 
 const BASE = {
-  MOLT_CONTRACT_ID: "molt-lobster-test.testnet",
-  MOLT_RPC_URL: "https://test.rpc.fastnear.com",
-  STATE_FILE: "/tmp/molt-bot-state.json",
+  SHED_CONTRACT_ID: "shed-lobster-test.testnet",
+  SHED_RPC_URL: "https://test.rpc.fastnear.com",
+  STATE_FILE: "/tmp/shed-bot-state.json",
 };
 const CREDS = { X_CONSUMER_KEY: "ck", X_CONSUMER_SECRET: "cs", X_ACCESS_TOKEN: "at", X_ACCESS_SECRET: "as" };
 
@@ -39,14 +39,14 @@ test("DRY_RUN=false with credentials loads them", () => {
 
 test("rejects bad values", () => {
   const cases: Array<[Record<string, string>, RegExp]> = [
-    [{ MOLT_CONTRACT_ID: "" }, /MOLT_CONTRACT_ID is required/],
-    [{ MOLT_CONTRACT_ID: "Bad..Id" }, /not a valid NEAR account id/],
-    [{ MOLT_RPC_URL: "http://rpc.example.com" }, /MOLT_RPC_URL must use https/],
-    [{ MOLT_RPC_URL: "not a url" }, /MOLT_RPC_URL is not a valid URL/],
+    [{ SHED_CONTRACT_ID: "" }, /SHED_CONTRACT_ID is required/],
+    [{ SHED_CONTRACT_ID: "Bad..Id" }, /not a valid NEAR account id/],
+    [{ SHED_RPC_URL: "http://rpc.example.com" }, /SHED_RPC_URL must use https/],
+    [{ SHED_RPC_URL: "not a url" }, /SHED_RPC_URL is not a valid URL/],
     [{ POLL_SECONDS: "2" }, /POLL_SECONDS must be an integer >= 5/],
     [{ MIN_POST_INTERVAL_SECONDS: "-1" }, /MIN_POST_INTERVAL_SECONDS/],
     [{ DRY_RUN: "maybe" }, /DRY_RUN must be true or false/],
-    [{ PUBLIC_URL: "http://molt.example.com" }, /PUBLIC_URL must use https/],
+    [{ PUBLIC_URL: "http://shed.example.com" }, /PUBLIC_URL must use https/],
     [{ STATE_FILE: " " }, /STATE_FILE is required/],
     [{ LOG_LEVEL: "loud" }, /LOG_LEVEL/],
   ];

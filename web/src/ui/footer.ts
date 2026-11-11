@@ -2,7 +2,7 @@
 import { escapeHtml, memoRender } from "../dom";
 import type { AppConfig } from "../config";
 import type { Config } from "../contract/types";
-import { formatBps, formatMolt, formatNsDuration, nsToMs } from "../format";
+import { formatBps, formatShed, formatNsDuration, nsToMs } from "../format";
 
 export interface FooterData {
   app: AppConfig;
@@ -16,26 +16,26 @@ export interface Footer {
 const BPS_PER_UNIT = 10_000;
 
 const RULES = [
-  "The whole $MOLT supply is minted once. Nothing ever mints again.",
-  "Holders burn $MOLT to change one of the mascot's 6 traits. Each change to the same slot in a cycle costs more.",
-  "When a cycle ends, its final look is frozen into an NFT skin and auctioned in $MOLT.",
+  "The whole $SHED supply is minted once. Nothing ever mints again.",
+  "Holders burn $SHED to change one of the mascot's 6 traits. Each change to the same slot in a cycle costs more.",
+  "When a cycle ends, its final look is frozen into an NFT skin and auctioned in $SHED.",
   "Part of the winning bid is burned; the rest is shared pro-rata by the cycle's sculptors. No bid: the top sculptor gets the skin.",
   "Storage is prepaid by callers: the first sculptor of a cycle pays the skin's storage (≈0.074 NEAR), new sculptors ≈0.004 NEAR.",
-  "No admin, no pause, no upgrade. Anyone can call molt() to advance time.",
+  "No admin, no pause, no upgrade. Anyone can call shed() to advance time.",
 ];
 
 function parameters(config: Config): string {
   const rows: Array<[string, string]> = [
     ["Initial holder", escapeHtml(config.initial_holder)],
-    ["Total supply", `${formatMolt(config.total_supply, 0)} MOLT`],
-    ["Airdrop pool / per account", `${formatMolt(config.airdrop_pool, 0)} / ${formatMolt(config.airdrop_amount)} MOLT`],
+    ["Total supply", `${formatShed(config.total_supply, 0)} SHED`],
+    ["Airdrop pool / per account", `${formatShed(config.airdrop_pool, 0)} / ${formatShed(config.airdrop_amount)} SHED`],
     ["Genesis", new Date(nsToMs(config.genesis_ns)).toLocaleString()],
     ["Cycle duration", formatNsDuration(config.cycle_duration_ns)],
     ["Auction duration", formatNsDuration(config.auction_duration_ns)],
     ["Anti-snipe window", formatNsDuration(config.anti_snipe_ns)],
-    ["Base transform price", `${formatMolt(config.base_transform_price)} MOLT`],
+    ["Base transform price", `${formatShed(config.base_transform_price)} SHED`],
     ["Price growth per change", `×${config.price_growth_bps / BPS_PER_UNIT}`],
-    ["Min bid", `${formatMolt(config.min_bid)} MOLT`],
+    ["Min bid", `${formatShed(config.min_bid)} SHED`],
     ["Min bid increment", formatBps(config.min_bid_increment_bps)],
     ["Auction burn", formatBps(config.auction_burn_bps)],
   ];

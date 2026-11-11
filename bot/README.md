@@ -1,6 +1,6 @@
-# MOLT X announcer bot
+# SHED X announcer bot
 
-An off-chain bot that mirrors MOLT onchain activity on X (Twitter). It is **cosmetic**: the game works the same
+An off-chain bot that mirrors SHED onchain activity on X (Twitter). It is **cosmetic**: the game works the same
 whether the bot runs or not, and the bot never holds NEAR keys or signs NEAR transactions. It only reads public
 contract views over JSON-RPC and posts with the bot account's X credentials.
 
@@ -10,8 +10,8 @@ It polls `journal({ limit: 64 })` (finality `final`) every `POLL_SECONDS` and ha
 
 | journal entry | post | image |
 | --- | --- | --- |
-| `molt` | immediately: "Cycle N is over. Skin #k is frozen and up for auction…", MOLT burned, closing time, burn share | the skin |
-| `settle` | immediately: sold to X for Y MOLT (Z burned, rest to sculptors), or "no bids: goes to the top sculptor" | the skin |
+| `shed` | immediately: "Cycle N is over. Skin #k is frozen and up for auction…", SHED burned, closing time, burn share | the skin |
+| `settle` | immediately: sold to X for Y SHED (Z burned, rest to sculptors), or "no bids: goes to the top sculptor" | the skin |
 | `transform` | batched, at most one post per `MIN_POST_INTERVAL_SECONDS`: who changed what, total burned, face holder | the live mascot |
 | `bid`, `airdrop`, `sculptor_claim` | ignored | — |
 
@@ -37,7 +37,7 @@ src/
   publish.ts    dry-run (files) or X publisher
   state.ts      cursor + pending batch, atomic writes (temp file + rename, mode 0600)
   announcer.ts  one poll step       main.ts  wiring, poll loop, SIGTERM/SIGINT
-deploy/molt-bot.service   hardened systemd unit
+deploy/shed-bot.service   hardened systemd unit
 Dockerfile                container alternative
 ```
 
@@ -55,22 +55,22 @@ npm test           # node:test (OAuth vector, compose limits, cursor/batching, c
 plus the matching `.png`.
 
 ```bash
-DRY_RUN=true MOLT_CONTRACT_ID=molt-lobster-test.testnet MOLT_RPC_URL=https://test.rpc.fastnear.com \
-  STATE_FILE=/tmp/molt-bot-state.json node dist/main.js
+DRY_RUN=true SHED_CONTRACT_ID=shed-lobster-test.testnet SHED_RPC_URL=https://test.rpc.fastnear.com \
+  STATE_FILE=/tmp/shed-bot-state.json node dist/main.js
 ```
 
 To replay the journal currently onchain once (useful to preview every template), stop the bot and write a cursor of
 0 by hand, then start it again:
 
 ```bash
-echo '{"cursor_ns":"0"}' > /tmp/molt-bot-state.json
+echo '{"cursor_ns":"0"}' > /tmp/shed-bot-state.json
 ```
 
 Logs are JSON lines on stdout (`LOG_LEVEL`: `debug`, `info`, `warn`, `error`).
 
 ## Configuration
 
-See [.env.example](.env.example). Required: `MOLT_CONTRACT_ID`, `MOLT_RPC_URL` (https), `STATE_FILE`. Optional:
+See [.env.example](.env.example). Required: `SHED_CONTRACT_ID`, `SHED_RPC_URL` (https), `STATE_FILE`. Optional:
 `POLL_SECONDS` (30, min 5), `MIN_POST_INTERVAL_SECONDS` (1800), `OUT_DIR` (`out`), `DRY_RUN` (`true`), `PUBLIC_URL`
 (https, appended to every post), `LOG_LEVEL` (`info`). `X_CONSUMER_KEY`, `X_CONSUMER_SECRET`, `X_ACCESS_TOKEN`,
 `X_ACCESS_SECRET` are required only when `DRY_RUN=false`. An invalid configuration exits with code 78 (systemd does
@@ -91,7 +91,7 @@ not restart it).
   regenerate the access token and secret (and the consumer key if exposed) in the X Developer Console, check the
   account's recent posts, rotate the server.
 - **Limits of the sandbox:** the systemd unit runs the bot as a dedicated user with a read-only system, no home
-  access, a private `/tmp`, no capabilities and write access to `/var/lib/molt-bot` only. The env file is read by
+  access, a private `/tmp`, no capabilities and write access to `/var/lib/shed-bot` only. The env file is read by
   systemd as root (mode 0600, root-owned), but the running process can still read its own environment: hardening
   limits what else an attacker reaches, it does not hide the X credentials from code running as the bot.
 - **Cost abuse:** the batch interval and the per-event policy bound the post rate. Set a low auto-recharge or none in
@@ -120,7 +120,7 @@ The X API has no free tier: you buy credits and each request is charged. At the 
 "Post: Create (with URL)" costs $0.200**, so setting `PUBLIC_URL` makes every post about 13× more expensive. Media
 upload is not listed separately on that page; check the console for current rates.
 
-Rough budget: one `molt` and one `settle` post per sculpted cycle, plus at most `86400 / MIN_POST_INTERVAL_SECONDS`
+Rough budget: one `shed` and one `settle` post per sculpted cycle, plus at most `86400 / MIN_POST_INTERVAL_SECONDS`
 transform summaries per day (48 with the default 30 minutes). With daily cycles and no link that is at most about
 50 posts/day ≈ $0.75/day; with `PUBLIC_URL` about $10/day. Testnet-style 3-minute cycles post far more: keep those in
 dry-run.
@@ -128,31 +128,31 @@ dry-run.
 ## Run on a Linux server with systemd
 
 ```bash
-sudo useradd --system --no-create-home --shell /usr/sbin/nologin molt-bot
-sudo mkdir -p /opt/molt-bot /etc/molt-bot
-sudo cp -r package.json package-lock.json tsconfig.json src /opt/molt-bot/
-cd /opt/molt-bot && sudo npm ci && sudo npm run build && sudo npm prune --omit=dev
-sudo install -m 0600 -o root -g root .env.example /etc/molt-bot/molt-bot.env   # then edit it
-echo 'STATE_FILE=/var/lib/molt-bot/state.json' | sudo tee -a /etc/molt-bot/molt-bot.env
-echo 'OUT_DIR=/var/lib/molt-bot/out' | sudo tee -a /etc/molt-bot/molt-bot.env
-sudo cp deploy/molt-bot.service /etc/systemd/system/
-sudo systemctl daemon-reload && sudo systemctl enable --now molt-bot
-journalctl -u molt-bot -f
+sudo useradd --system --no-create-home --shell /usr/sbin/nologin shed-bot
+sudo mkdir -p /opt/shed-bot /etc/shed-bot
+sudo cp -r package.json package-lock.json tsconfig.json src /opt/shed-bot/
+cd /opt/shed-bot && sudo npm ci && sudo npm run build && sudo npm prune --omit=dev
+sudo install -m 0600 -o root -g root .env.example /etc/shed-bot/shed-bot.env   # then edit it
+echo 'STATE_FILE=/var/lib/shed-bot/state.json' | sudo tee -a /etc/shed-bot/shed-bot.env
+echo 'OUT_DIR=/var/lib/shed-bot/out' | sudo tee -a /etc/shed-bot/shed-bot.env
+sudo cp deploy/shed-bot.service /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now shed-bot
+journalctl -u shed-bot -f
 ```
 
-The code in `/opt/molt-bot` stays root-owned and read-only for the bot. Adjust `ExecStart` if `node` is not at
-`/usr/bin/node` (Node 22+). Check the sandbox with `systemd-analyze security molt-bot`.
+The code in `/opt/shed-bot` stays root-owned and read-only for the bot. Adjust `ExecStart` if `node` is not at
+`/usr/bin/node` (Node 22+). Check the sandbox with `systemd-analyze security shed-bot`.
 
 ## Docker alternative
 
 ```bash
-docker build -t molt-bot .
-docker run -d --name molt-bot --restart on-failure --read-only --cap-drop ALL \
-  --security-opt no-new-privileges --env-file ./molt-bot.env \
-  -v molt-bot-data:/data molt-bot
+docker build -t shed-bot .
+docker run -d --name shed-bot --restart on-failure --read-only --cap-drop ALL \
+  --security-opt no-new-privileges --env-file ./shed-bot.env \
+  -v shed-bot-data:/data shed-bot
 ```
 
-`molt-bot.env` is a copy of `.env.example` (mode 0600) without `STATE_FILE`/`OUT_DIR`, which the image sets.
+`shed-bot.env` is a copy of `.env.example` (mode 0600) without `STATE_FILE`/`OUT_DIR`, which the image sets.
 
 The image is multi-stage (no dev dependencies or sources in the final layer), runs as the non-root `node` user, and
 only writes to the `/data` volume (`STATE_FILE=/data/state.json`, `OUT_DIR=/data/out`), so it works with `--read-only`.

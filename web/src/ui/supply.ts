@@ -1,7 +1,7 @@
 // Supply figures and a cumulative-burn chart rebuilt from the journal.
 import { memoRender } from "../dom";
 import type { JournalEntry, Stats } from "../contract/types";
-import { formatMolt, formatShare, moltToNumber, nsToMs } from "../format";
+import { formatShed, formatShare, shedToNumber, nsToMs } from "../format";
 import { chainNowMs } from "../near/clock";
 
 export interface SupplyData {
@@ -51,10 +51,10 @@ function chart(points: BurnPoint[]): string {
   if (!first || !last || points.length < 3) {
     return `<p class="placeholder">No burn recorded yet.</p>`;
   }
-  const maxValue = moltToNumber(last.cumulative) || 1;
+  const maxValue = shedToNumber(last.cumulative) || 1;
   const span = last.atMs - first.atMs || 1;
   const x = (ms: number) => CHART_PADDING + ((ms - first.atMs) / span) * (CHART_WIDTH - 2 * CHART_PADDING);
-  const y = (v: bigint) => CHART_HEIGHT - CHART_PADDING - (moltToNumber(v) / maxValue) * (CHART_HEIGHT - 2 * CHART_PADDING);
+  const y = (v: bigint) => CHART_HEIGHT - CHART_PADDING - (shedToNumber(v) / maxValue) * (CHART_HEIGHT - 2 * CHART_PADDING);
 
   // Step line: burn happens at discrete events.
   let path = `M${x(first.atMs).toFixed(1)},${y(first.cumulative).toFixed(1)}`;
@@ -65,11 +65,11 @@ function chart(points: BurnPoint[]): string {
 
   return `
     <figure class="chart">
-      <svg viewBox="0 0 ${CHART_WIDTH} ${CHART_HEIGHT}" role="img" aria-label="Cumulative MOLT burned over time">
+      <svg viewBox="0 0 ${CHART_WIDTH} ${CHART_HEIGHT}" role="img" aria-label="Cumulative SHED burned over time">
         <path class="chart-area" d="${area}" />
         <path class="chart-line" d="${path}" />
       </svg>
-      <figcaption class="small muted">Cumulative burn since ${from}: ${formatMolt(first.cumulative)} → ${formatMolt(last.cumulative)} MOLT</figcaption>
+      <figcaption class="small muted">Cumulative burn since ${from}: ${formatShed(first.cumulative)} → ${formatShed(last.cumulative)} SHED</figcaption>
     </figure>`;
 }
 
@@ -84,12 +84,12 @@ function render(root: HTMLElement, { stats, journal }: SupplyData): void {
   root.innerHTML = `
     <p class="big-number">${formatShare(burned, initial, BURNED_SHARE_DIGITS)} <small>of supply burned</small></p>
     <dl class="facts">
-      <dt>Initial supply</dt><dd>${formatMolt(initial, 0)} MOLT</dd>
-      <dt>Current supply</dt><dd>${formatMolt(current, 0)} MOLT</dd>
-      <dt>Burned by sculpting</dt><dd>${formatMolt(byTransform)} MOLT</dd>
-      <dt>Burned by auctions</dt><dd>${formatMolt(byAuction)} MOLT</dd>
+      <dt>Initial supply</dt><dd>${formatShed(initial, 0)} SHED</dd>
+      <dt>Current supply</dt><dd>${formatShed(current, 0)} SHED</dd>
+      <dt>Burned by sculpting</dt><dd>${formatShed(byTransform)} SHED</dd>
+      <dt>Burned by auctions</dt><dd>${formatShed(byAuction)} SHED</dd>
       <dt>Skins minted</dt><dd>${stats.skins_minted}</dd>
-      <dt>Airdrop left</dt><dd>${formatMolt(stats.airdrop_remaining, 0)} MOLT</dd>
+      <dt>Airdrop left</dt><dd>${formatShed(stats.airdrop_remaining, 0)} SHED</dd>
     </dl>
     <div class="burn-split" aria-label="Burn split">
       <span class="burn-transform" style="width:${burned > 0n ? transformShare : "0%"}"></span>

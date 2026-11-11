@@ -956,6 +956,7 @@ version = "2.2.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "115531babc129696a58c64a4fef0a8bf9e9698629fb97e9e40767d235cfbcd53"
 dependencies = [
+ "pkcs8",
  "signature",
 ]
 
@@ -967,8 +968,10 @@ checksum = "70e796c081cee67dc755e1a36a0a172b897fab85fc3f6bc48307991f64e4eca9"
 dependencies = [
  "curve25519-dalek",
  "ed25519",
+ "serde",
  "sha2 0.10.9",
  "subtle",
+ "zeroize",
 ]
 
 [[package]]
@@ -1953,20 +1956,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "molt"
-version = "0.1.0"
-dependencies = [
- "cargo-near-build",
- "near-api",
- "near-contract-standards",
- "near-sandbox",
- "near-sdk",
- "testresult",
- "tokio",
- "uint 0.10.2",
-]
-
-[[package]]
 name = "multiversion_no_op"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2324,6 +2313,7 @@ dependencies = [
  "base64 0.22.1",
  "borsh",
  "bs58 0.5.1",
+ "ed25519-dalek",
  "near-account-id",
  "near-crypto",
  "near-gas",
@@ -2338,6 +2328,7 @@ dependencies = [
  "near-token",
  "near-vm-runner",
  "once_cell",
+ "p256",
  "serde",
  "serde_json",
  "serde_with",
@@ -3395,6 +3386,44 @@ checksum = "be176f1a57ce4e3d31c1a166222d9768de5954f811601fb7ca06fc8203905ce1"
 dependencies = [
  "digest 0.11.3",
  "keccak 0.2.2",
+]
+
+[[package]]
+name = "shed"
+version = "0.1.0"
+dependencies = [
+ "cargo-near-build",
+ "near-api",
+ "near-contract-standards",
+ "near-sandbox",
+ "near-sdk",
+ "shed-art",
+ "shed-exuviae",
+ "testresult",
+ "tokio",
+ "uint 0.10.2",
+]
+
+[[package]]
+name = "shed-art"
+version = "0.1.0"
+dependencies = [
+ "borsh",
+ "near-sdk",
+ "schemars 0.8.22",
+ "serde",
+]
+
+[[package]]
+name = "shed-exuviae"
+version = "0.1.0"
+dependencies = [
+ "borsh",
+ "near-contract-standards",
+ "near-gas",
+ "near-sdk",
+ "serde",
+ "shed-art",
 ]
 
 [[package]]

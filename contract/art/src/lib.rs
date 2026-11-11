@@ -5,12 +5,13 @@
 //! face. The 32×32 result becomes an SVG: one background rect, then one path per colour made
 //! of 1-pixel-high horizontal strokes.
 
+use near_sdk::base64::{Engine, engine::general_purpose::STANDARD};
+
 mod palette;
 mod sprites;
 
-use near_sdk::base64::{Engine, engine::general_purpose::STANDARD};
-
-use crate::slots::{Genome, Slot};
+pub mod slot;
+use slot::{Genome, Slot};
 use palette::SHELLS;
 use sprites::{SIZE, Sprite};
 
@@ -108,10 +109,6 @@ fn pick(mut sheet: Vec<Sprite>, index: u8) -> Sprite {
     sheet.swap_remove(if index < sheet.len() { index } else { 0 })
 }
 
-/// `data:` URI suitable for NEP-177 `media`.
-pub fn svg_data_uri(svg: &str) -> String {
-    format!("data:image/svg+xml;base64,{}", STANDARD.encode(svg))
-}
 
 #[cfg(test)]
 mod tests {
@@ -184,10 +181,9 @@ mod tests {
             "largest skin renders {largest} bytes"
         );
     }
+}
 
-    #[test]
-    fn data_uri_is_base64_svg() {
-        let uri = svg_data_uri("<svg/>");
-        assert_eq!(uri, "data:image/svg+xml;base64,PHN2Zy8+");
-    }
+/// `data:` URI suitable for NEP-177 `media`.
+pub fn svg_data_uri(svg: &str) -> String {
+    format!("data:image/svg+xml;base64,{}", STANDARD.encode(svg))
 }

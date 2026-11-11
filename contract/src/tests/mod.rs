@@ -13,7 +13,7 @@ use near_sdk::json_types::U128;
 use near_sdk::test_utils::VMContextBuilder;
 use near_sdk::{AccountId, NearToken, testing_env};
 
-use crate::Molt;
+use crate::Shed;
 pub(crate) use crate::config::tests::{
     AIRDROP, AIRDROP_POOL, ANTI_SNIPE, AUCTION, BASE_PRICE, CYCLE, MIN_BID, SUPPLY, valid_config,
 };
@@ -25,7 +25,7 @@ pub(crate) fn account(name: &str) -> AccountId {
 }
 
 pub(crate) fn contract_id() -> AccountId {
-    account("molt")
+    account("shed")
 }
 
 pub(crate) fn holder() -> AccountId {
@@ -46,13 +46,13 @@ pub(crate) fn call_as(caller: &AccountId, now_ns: u64, deposit_yocto: u128) {
     );
 }
 
-pub(crate) fn new_contract() -> Molt {
+pub(crate) fn new_contract() -> Shed {
     call_as(&contract_id(), GENESIS, 0);
-    Molt::new(valid_config())
+    Shed::new(valid_config(), None)
 }
 
 /// Registers `who` and sends them `amount` from the initial holder.
-pub(crate) fn fund(contract: &mut Molt, who: &AccountId, amount: u128, now_ns: u64) {
+pub(crate) fn fund(contract: &mut Shed, who: &AccountId, amount: u128, now_ns: u64) {
     let deposit = contract.storage_balance_bounds().min;
     call_as(who, now_ns, deposit.as_yoctonear());
     contract.storage_deposit(None, Some(true));
@@ -60,13 +60,13 @@ pub(crate) fn fund(contract: &mut Molt, who: &AccountId, amount: u128, now_ns: u
     contract.ft_transfer(who.clone(), U128(amount), None);
 }
 
-pub(crate) fn balance(contract: &Molt, who: &AccountId) -> u128 {
+pub(crate) fn balance(contract: &Shed, who: &AccountId) -> u128 {
     contract.ft_balance_of(who.clone()).0
 }
 
 /// `transform` as `who` at `now_ns`, attaching exactly the deposit the contract asks for.
 pub(crate) fn sculpt(
-    contract: &mut Molt,
+    contract: &mut Shed,
     who: &AccountId,
     now_ns: u64,
     slot: crate::slots::Slot,

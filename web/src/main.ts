@@ -2,7 +2,7 @@ import "./style.css";
 import { loadConfig, type AppConfig } from "./config";
 import { requireElement } from "./dom";
 import { describeError } from "./errors";
-import { formatMolt, parseMolt } from "./format";
+import { formatShed, parseShed } from "./format";
 import { createRpc } from "./near/rpc";
 import { createWallet, type WalletService } from "./near/wallet";
 import { createStore, type AccountData, type GalleryData, type Snapshot } from "./store";
@@ -137,20 +137,20 @@ function start(app: HTMLElement, cfg: AppConfig): void {
     const minNext = BigInt(view.auction.min_next_bid);
     let amount: bigint;
     try {
-      amount = amountText.trim() === "" ? minNext : parseMolt(amountText);
+      amount = amountText.trim() === "" ? minNext : parseShed(amountText);
     } catch (error) {
       status.toast("error", describeError(error, cfg).detail);
       return;
     }
     if (amount < minNext) {
-      status.toast("error", `Minimum next bid is ${formatMolt(minNext)} MOLT.`);
+      status.toast("error", `Minimum next bid is ${formatShed(minNext)} SHED.`);
       return;
     }
     if (account && amount > BigInt(account.balance)) {
-      status.toast("error", `Not enough MOLT: you hold ${formatMolt(account.balance)}.`);
+      status.toast("error", `Not enough SHED: you hold ${formatShed(account.balance)}.`);
       return;
     }
-    void runTx(`Bid ${formatMolt(amount)} MOLT on skin #${skinId}`, (w) => w.bid(skinId, amount));
+    void runTx(`Bid ${formatShed(amount)} SHED on skin #${skinId}`, (w) => w.bid(skinId, amount));
   }
 
   // ---- Sculpt preview -----------------------------------------------------
@@ -192,14 +192,14 @@ function start(app: HTMLElement, cfg: AppConfig): void {
     onSignOut: signOut,
     onClaimAirdrop: () => void runTx("Claim airdrop", (w) => w.claimAirdrop()),
   });
-  const hero = createHeroPanel(layout.heroLive, layout.heroPreview, () => void runTx("Molt", (w) => w.molt()));
+  const hero = createHeroPanel(layout.heroLive, layout.heroPreview, () => void runTx("Shed", (w) => w.shed()));
   const sculpt = createSculptPanel(layout.sculpt, {
     onPreview: (choice) => void showPreview(choice),
     onTransform: ({ slot, variant }) => void runTx(`Sculpt ${slot}`, (w) => w.transform(slot, variant)),
   });
   const auctions = createAuctionsPanel(layout.auctions, {
     onBid: bid,
-    onMolt: () => void runTx("Molt", (w) => w.molt()),
+    onShed: () => void runTx("Shed", (w) => w.shed()),
   });
   const galleryPanel = createGalleryPanel(layout.gallery, {
     onPage: (page) => {

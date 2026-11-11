@@ -98,9 +98,9 @@ function isAccountId(value: string): boolean {
 export function loadConfig(env: Env): BotConfig {
   const read = new Reader(env);
 
-  const contractId = read.required("MOLT_CONTRACT_ID");
-  if (contractId && !isAccountId(contractId)) read.problems.push("MOLT_CONTRACT_ID is not a valid NEAR account id");
-  const rpcUrl = read.httpsUrl("MOLT_RPC_URL", read.required("MOLT_RPC_URL") || null) ?? "";
+  const contractId = read.required("SHED_CONTRACT_ID");
+  if (contractId && !isAccountId(contractId)) read.problems.push("SHED_CONTRACT_ID is not a valid NEAR account id");
+  const rpcUrl = read.httpsUrl("SHED_RPC_URL", read.required("SHED_RPC_URL") || null) ?? "";
   const pollSeconds = read.integer("POLL_SECONDS", DEFAULT_POLL_SECONDS, MIN_POLL_SECONDS);
   const minPostIntervalSeconds = read.integer("MIN_POST_INTERVAL_SECONDS", DEFAULT_MIN_POST_INTERVAL_SECONDS, 0);
   const stateFile = read.required("STATE_FILE");

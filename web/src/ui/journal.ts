@@ -1,7 +1,7 @@
 // Human-readable log of the latest contract events.
 import { escapeHtml, memoRender } from "../dom";
 import type { CatalogEntry, JournalEntry } from "../contract/types";
-import { formatAccount, formatMolt, timeAgo } from "../format";
+import { formatAccount, formatShed, timeAgo } from "../format";
 import { chainNowMs } from "../near/clock";
 
 const JOURNAL_DISPLAY_LIMIT = 50;
@@ -26,21 +26,21 @@ function variantName(entry: JournalEntry, catalog: CatalogEntry[]): string {
 }
 
 function describe(entry: JournalEntry, catalog: CatalogEntry[]): string {
-  const amount = `${formatMolt(entry.amount)} MOLT`;
+  const amount = `${formatShed(entry.amount)} SHED`;
   const skin = entry.skin_id === null ? "a skin" : `skin #${entry.skin_id}`;
   switch (entry.kind) {
     case "transform":
       return `${who(entry)} burned ${amount} → ${escapeHtml(entry.slot ?? "?")} = <em>${variantName(entry, catalog)}</em>`;
-    case "molt":
+    case "shed":
       return entry.skin_id === null
         ? `Cycle ${entry.cycle} closed with no transformation`
-        : `Cycle ${entry.cycle} molted into <strong>${skin}</strong> (${amount} burned during the cycle)`;
+        : `Cycle ${entry.cycle} shed into <strong>${skin}</strong> (${amount} burned during the cycle)`;
     case "bid":
       return `${who(entry)} bid ${amount} on ${skin}`;
     case "settle":
       return BigInt(entry.amount) === 0n
         ? `No bid on ${skin}: it goes to top sculptor ${who(entry)}`
-        : `Skin #${entry.skin_id ?? "?"} sold to ${who(entry)} for ${amount}, ${formatMolt(entry.burned)} MOLT burned`;
+        : `Skin #${entry.skin_id ?? "?"} sold to ${who(entry)} for ${amount}, ${formatShed(entry.burned)} SHED burned`;
     case "sculptor_claim":
       return `${who(entry)} claimed ${amount} sculptor share from ${skin}`;
     case "airdrop":

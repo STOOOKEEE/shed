@@ -1,7 +1,7 @@
 // Number, amount and time formatting. Amounts are bigint-exact.
 
-const MOLT_DECIMALS = 18;
-const YOCTO_PER_MOLT = 10n ** BigInt(MOLT_DECIMALS);
+const SHED_DECIMALS = 18;
+const YOCTO_PER_SHED = 10n ** BigInt(SHED_DECIMALS);
 const DEFAULT_FRACTION_DIGITS = 2;
 const NS_PER_MS = 1_000_000n;
 const MS_PER_SECOND = 1000;
@@ -14,29 +14,29 @@ export class AmountInputError extends Error {
   override name = "AmountInputError";
 }
 
-/** yocto-MOLT → "1,500.25" (truncated, never rounded up). */
-export function formatMolt(yocto: string | bigint, fractionDigits = DEFAULT_FRACTION_DIGITS): string {
+/** yocto-SHED → "1,500.25" (truncated, never rounded up). */
+export function formatShed(yocto: string | bigint, fractionDigits = DEFAULT_FRACTION_DIGITS): string {
   const value = BigInt(yocto);
   const abs = value < 0n ? -value : value;
   const sign = value < 0n ? "-" : "";
-  const whole = (abs / YOCTO_PER_MOLT).toLocaleString("en-US");
-  const fraction = (abs % YOCTO_PER_MOLT)
+  const whole = (abs / YOCTO_PER_SHED).toLocaleString("en-US");
+  const fraction = (abs % YOCTO_PER_SHED)
     .toString()
-    .padStart(MOLT_DECIMALS, "0")
+    .padStart(SHED_DECIMALS, "0")
     .slice(0, fractionDigits)
     .replace(/0+$/, "");
   if (abs > 0n && whole === "0" && fraction === "") return `${sign}<0.${"0".repeat(Math.max(fractionDigits - 1, 0))}1`;
   return `${sign}${whole}${fraction ? `.${fraction}` : ""}`;
 }
 
-/** "1,500.5" (MOLT units, user input) → yocto-MOLT. */
-export function parseMolt(input: string): bigint {
+/** "1,500.5" (SHED units, user input) → yocto-SHED. */
+export function parseShed(input: string): bigint {
   const cleaned = input.trim().replace(/,/g, "");
   const match = /^(\d+)(?:\.(\d*))?$/.exec(cleaned);
   if (!match) throw new AmountInputError("Enter an amount like 1500 or 1500.5");
   const [, whole = "0", fraction = ""] = match;
-  if (fraction.length > MOLT_DECIMALS) throw new AmountInputError(`At most ${MOLT_DECIMALS} decimals.`);
-  return BigInt(whole) * YOCTO_PER_MOLT + BigInt(fraction.padEnd(MOLT_DECIMALS, "0"));
+  if (fraction.length > SHED_DECIMALS) throw new AmountInputError(`At most ${SHED_DECIMALS} decimals.`);
+  return BigInt(whole) * YOCTO_PER_SHED + BigInt(fraction.padEnd(SHED_DECIMALS, "0"));
 }
 
 const NEAR_DECIMALS = 24;
@@ -52,8 +52,8 @@ export function formatNear(yocto: string | bigint): string {
   return `${whole}.${fraction}`.replace(/\.?0+$/, "");
 }
 
-/** Approximate MOLT value as a float, for charts only. */
-export function moltToNumber(yocto: bigint): number {
+/** Approximate SHED value as a float, for charts only. */
+export function shedToNumber(yocto: bigint): number {
   return Number(yocto / 10n ** 12n) / 1e6;
 }
 

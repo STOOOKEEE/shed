@@ -1,10 +1,10 @@
-# MOLT — design
+# SHED — design
 
 The memecoin that sheds its skins. Track: **Memecoins With Mechanics** (`memecoins`).
 
 ## The rule
 
-1. **$MOLT** is an NEP-141 token. The whole supply is minted once at launch; nothing ever mints again.
+1. **$SHED** is an NEP-141 token. The whole supply is minted once at launch; nothing ever mints again.
 2. A public mascot (a 32×32 pixel-art lobster) has 6 trait slots: `background`, `shell`, `pattern`, `eyes` (the
    face: eyes + mouth), `claws`, `headgear`. Each slot has a fixed, finite list of variants decided at launch (no
    free text, no uploads → no moderation problem). Variants are hand-drawn sprite sheets compiled into the
@@ -16,19 +16,19 @@ The memecoin that sheds its skins. Track: **Memecoins With Mechanics** (`memecoi
    Each change also mints the **face** NFT (`face-<n>`) to the caller and burns the previous face (NEP-171
    `nft_burn` event): exactly one face exists, held by the last sculptor. Faces cannot be transferred or
    approved, their `media` is computed on read from the live genome, and `mascot().face` names the holder.
-4. **Molt.** Cycles are aligned on a fixed schedule (`genesis + n × cycle_duration`). When a cycle ends and it had
+4. **Shed.** Cycles are aligned on a fixed schedule (`genesis + n × cycle_duration`). When a cycle ends and it had
    at least one transformation, its final appearance is frozen into a unique NEP-171 NFT (**skin**), with the SVG
    rendered and stored onchain. The mascot keeps its look and the next cycle starts from it. A cycle with no
    transformation produces no skin.
-5. **Auction.** Each new skin is auctioned in $MOLT for `auction_duration`. Bids are escrowed in the contract;
+5. **Auction.** Each new skin is auctioned in $SHED for `auction_duration`. Bids are escrowed in the contract;
    outbid tokens are refunded immediately. A bid in the last `anti_snipe` window extends the auction to `now + anti_snipe`.
 6. **Settlement.** Winning bid: `auction_burn_bps` is **burned**, the rest becomes the *sculptor pool* of that skin,
    claimable pro-rata to contributions by the sculptors of the cycle (`claim_sculptor_share`). No bid: the skin goes
    to the cycle's top sculptor and nothing is burned.
 7. **No admin.** All parameters are passed to `new` once and exposed by `config()`. There is no owner, no pause, no
    upgrade method. After deploy the contract account's full-access key is deleted.
-8. **Keeper-free.** Every mechanic call (`transform`, `bid`, `claim_*`, `molt`) first advances time (settles
-   finished auctions, closes finished cycles). `molt()` does only that, callable by anyone.
+8. **Keeper-free.** Every mechanic call (`transform`, `bid`, `claim_*`, `shed`) first advances time (settles
+   finished auctions, closes finished cycles). `shed()` does only that, callable by anyone.
 9. **Storage is prepaid by callers.** The first `transform` of a cycle prepays the future skin (7 kB budget), each
    new sculptor of a cycle prepays their contribution entry, `claim_airdrop` prepays its record. Excess is refunded.
    The contract account itself cannot sculpt, bid or unregister; highest bidders cannot unregister.
@@ -48,7 +48,7 @@ Burn sources: transformations (100 %) and auctions (`auction_burn_bps`). Supply 
 
 ## Contract API (JSON)
 
-Amounts are yocto-MOLT strings (`U128`, 18 decimals). Times are nanoseconds (`U64` strings). `Slot` is one of
+Amounts are yocto-SHED strings (`U128`, 18 decimals). Times are nanoseconds (`U64` strings). `Slot` is one of
 `"background" | "shell" | "pattern" | "eyes" | "claws" | "headgear"`.
 
 ### Init
@@ -75,7 +75,7 @@ Amounts are yocto-MOLT strings (`U128`, 18 decimals). Times are nanoseconds (`U6
 | `bid({ skin_id, amount })` | 1 yocto | — | escrow bid (only the difference when raising your own), refund previous bidder |
 | `claim_sculptor_share({ skin_id })` | — | U128 | pay caller's pro-rata share |
 | `claim_airdrop()` | `airdrop_deposit` | U128 | one-time airdrop (caller must be storage-registered) |
-| `molt()` | — | bool | advance cycles/auctions; `true` if something changed |
+| `shed()` | — | bool | advance cycles/auctions; `true` if something changed |
 
 Plus NEP-141 (`ft_*`), NEP-145 (`storage_*`), NEP-148 (`ft_metadata`), NEP-171/177/178/181 (`nft_*`).
 
@@ -85,7 +85,7 @@ Plus NEP-141 (`ft_*`), NEP-145 (`storage_*`), NEP-148 (`ft_metadata`), NEP-171/1
 | --- | --- |
 | `config()` | config + `genesis_ns` |
 | `catalog()` | `[{ slot, variants: [name] }]` |
-| `mascot()` | `{ cycle, cycle_ends_at_ns, molt_pending, genome, svg, slot_prices, slot_changes, cycle_burned, top_sculptor }` |
+| `mascot()` | `{ cycle, cycle_ends_at_ns, shed_pending, genome, svg, slot_prices, slot_changes, cycle_burned, top_sculptor }` |
 | `preview_svg({ slot, variant })` | SVG string of the current mascot with one trait swapped |
 | `skin({ skin_id })` / `skins({ from_index, limit })` | `{ skin_id, cycle, genome, svg, owner_id, auction }` |
 | `auctions()` | open auctions `{ skin_id, ends_at_ns, highest_bidder, highest_bid, min_next_bid, settled }` |

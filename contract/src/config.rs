@@ -10,7 +10,7 @@ pub const MAX_PRICE_GROWTH_BPS: u32 = 10 * BPS_DENOMINATOR;
 
 #[near(serializers = [json, borsh])]
 #[derive(Clone, Debug, PartialEq)]
-pub struct MoltConfig {
+pub struct ShedConfig {
     /// Receives `total_supply - airdrop_pool` at launch.
     pub initial_holder: AccountId,
     pub total_supply: U128,
@@ -32,7 +32,7 @@ pub struct MoltConfig {
     pub auction_burn_bps: u32,
 }
 
-impl MoltConfig {
+impl ShedConfig {
     /// Checks the parameters are coherent. `contract_id` must not be the initial holder:
     /// the contract's own balance holds escrowed bids, pools and the airdrop.
     pub fn validate(&self, contract_id: &AccountId) -> Result<(), &'static str> {
@@ -99,8 +99,8 @@ pub(crate) mod tests {
     pub(crate) const BASE_PRICE: u128 = 100;
     pub(crate) const MIN_BID: u128 = 50;
 
-    pub(crate) fn valid_config() -> MoltConfig {
-        MoltConfig {
+    pub(crate) fn valid_config() -> ShedConfig {
+        ShedConfig {
             initial_holder: "holder.near".parse().unwrap(),
             total_supply: U128(SUPPLY),
             airdrop_pool: U128(AIRDROP_POOL),
@@ -117,10 +117,10 @@ pub(crate) mod tests {
     }
 
     fn contract() -> AccountId {
-        "molt.near".parse().unwrap()
+        "shed.near".parse().unwrap()
     }
 
-    fn rejected(change: impl FnOnce(&mut MoltConfig)) -> Result<(), &'static str> {
+    fn rejected(change: impl FnOnce(&mut ShedConfig)) -> Result<(), &'static str> {
         let mut config = valid_config();
         change(&mut config);
         config.validate(&contract())

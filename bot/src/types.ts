@@ -1,6 +1,6 @@
 // Contract view shapes, restricted to the fields the bot reads.
 
-export const JOURNAL_KINDS = ["transform", "molt", "bid", "settle", "sculptor_claim", "airdrop"] as const;
+export const JOURNAL_KINDS = ["transform", "shed", "bid", "settle", "sculptor_claim", "airdrop"] as const;
 export type JournalKind = (typeof JOURNAL_KINDS)[number];
 
 export interface JournalEntry {
@@ -9,7 +9,7 @@ export interface JournalEntry {
   at_ns: string;
   cycle: number;
   account_id: string | null;
-  /** yocto-MOLT (U128 string). */
+  /** yocto-SHED (U128 string). */
   amount: string;
   burned: string;
   skin_id: number | null;
