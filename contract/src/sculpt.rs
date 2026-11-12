@@ -113,7 +113,13 @@ impl Shed {
         } else {
             0
         };
-        bytes_cost(skin_bytes + contribution_bytes)
+        // Dethroning the face holder mints their exuvia in the burn collection.
+        let exuvia_bytes = if self.face.is_some() && self.exuviae_contract.is_some() {
+            shed_exuviae::MINT_STORAGE_BYTES
+        } else {
+            0
+        };
+        bytes_cost(skin_bytes + contribution_bytes + exuvia_bytes)
     }
 
     /// Adds `amount` to the caller's contribution to the current cycle; returns the new total.

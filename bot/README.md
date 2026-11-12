@@ -55,7 +55,7 @@ npm test           # node:test (OAuth vector, compose limits, cursor/batching, c
 plus the matching `.png`.
 
 ```bash
-DRY_RUN=true SHED_CONTRACT_ID=shed-lobster-test.testnet SHED_RPC_URL=https://test.rpc.fastnear.com \
+DRY_RUN=true SHED_CONTRACT_ID=shedcoin.testnet SHED_RPC_URL=https://test.rpc.fastnear.com \
   STATE_FILE=/tmp/shed-bot-state.json node dist/main.js
 ```
 

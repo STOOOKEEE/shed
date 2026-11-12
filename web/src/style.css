@@ -814,3 +814,17 @@ main {
     animation: none;
   }
 }
+
+/* ---- Face & exuviae ---------------------------------------------------- */
+
+.face-line {
+  margin-top: 0.75rem;
+  padding: 0.45rem 0.6rem;
+  border: 2px dashed var(--line);
+  overflow-wrap: anywhere;
+}
+
+.face-line.is-mine,
+.card.is-mine {
+  border-color: var(--kelp);
+}

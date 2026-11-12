@@ -21,6 +21,19 @@ export function svgImage(svg: string, alt: string, className = ""): string {
   return `<img class="${escapeHtml(className)}" src="${src}" alt="${escapeHtml(alt)}" decoding="async" />`;
 }
 
+const SVG_DATA_URI_PREFIX = "data:image/svg+xml;";
+
+/**
+ * Renders a contract-provided SVG data URI (e.g. NFT `media`) through an <img>.
+ * Anything that is not an inline SVG data URI (remote URL, other scheme) is refused.
+ */
+export function svgDataUriImage(dataUri: string | null, alt: string, className = ""): string {
+  if (dataUri === null || !dataUri.startsWith(SVG_DATA_URI_PREFIX)) {
+    return `<div class="${escapeHtml(className)} loading">no image</div>`;
+  }
+  return `<img class="${escapeHtml(className)}" src="${escapeHtml(dataUri)}" alt="${escapeHtml(alt)}" decoding="async" />`;
+}
+
 export function requireElement<T extends Element>(root: ParentNode, selector: string, type: new () => T): T {
   const found = root.querySelector(selector);
   if (!(found instanceof type)) throw new Error(`Missing element ${selector}`);

@@ -5,7 +5,7 @@ version = "0.1.0"
 edition = "2024"
 resolver = "3"
 rust-version = "1.93"
-repository = "https://github.com/<xxx>/<xxx>"
+repository = "https://github.com/STOOOKEEE/shed"
 
 [lib]
 # `cdylib` only when built standalone (the wasm contract); `rlib` as a dependency of `shed`.
@@ -13,7 +13,7 @@ repository = "https://github.com/<xxx>/<xxx>"
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-near-sdk = { version = "5.29", features = ["non-contract-usage"] }
+near-sdk = "5.29"
 near-contract-standards = "5.29"
 shed-art = { path = "../art" }
 near-gas = "0.3"
@@ -27,3 +27,6 @@ lto = true
 debug = false
 panic = "abort"
 overflow-checks = true
+
+[dev-dependencies]
+near-sdk = { version = "5.29", features = ["unit-testing"] }

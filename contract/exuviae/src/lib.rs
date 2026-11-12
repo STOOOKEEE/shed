@@ -103,8 +103,10 @@ impl Exuviae {
         let metadata = TokenMetadata {
             title: Some(format!("SHED Exuviae #{}", self.minted)),
             description: Some(format!(
-                "The carapace {} left behind after {} dethroned it. Held for {}.",
-                sculptor, successor, reign_ns.0
+                "The carapace {} left behind when {} reshaped the SHED mascot, after wearing its face for {}.",
+                sculptor,
+                successor,
+                format_reign(reign_ns.0)
             )),
             media: Some(shed_art::svg_data_uri(&svg)),
             issued_at: Some((env::block_timestamp() / 1_000_000).to_string()),
@@ -143,6 +145,12 @@ mod wasm_exports {
     #[unsafe(no_mangle)]
     pub extern "C" fn exuviae_new() {
         env::setup_panic_hook();
+        // Same guards as `#[init] #[private]`: once, and only by the account itself.
+        require!(!env::state_exists(), "Already initialized");
+        require!(
+            env::predecessor_account_id() == env::current_account_id(),
+            "Only the Exuviae account can initialize itself"
+        );
         let args: MinterArgs = serde_json::from_slice(env::input().unwrap_or_default().as_slice())
             .unwrap_or_else(|_| env::panic_str("Invalid arguments to exuviae_new"));
         let contract = Exuviae::exuviae_new(args.minter);
@@ -196,5 +204,43 @@ mod wasm_exports {
     #[derive(near_sdk::serde::Deserialize)]
     struct TokenArgs {
         token_id: String,
+    }
+}
+
+/// Human reign length: "3d 4h", "2h 15m", "4m 12s", "38s".
+pub fn format_reign(reign_ns: u64) -> String {
+    const NANOS_PER_SECOND: u64 = 1_000_000_000;
+    const SECONDS_PER_MINUTE: u64 = 60;
+    const SECONDS_PER_HOUR: u64 = 3_600;
+    const SECONDS_PER_DAY: u64 = 86_400;
+    let seconds = reign_ns / NANOS_PER_SECOND;
+    let (days, hours) = (
+        seconds / SECONDS_PER_DAY,
+        seconds % SECONDS_PER_DAY / SECONDS_PER_HOUR,
+    );
+    let (minutes, secs) = (
+        seconds % SECONDS_PER_HOUR / SECONDS_PER_MINUTE,
+        seconds % SECONDS_PER_MINUTE,
+    );
+    match (days, hours, minutes) {
+        (0, 0, 0) => format!("{secs}s"),
+        (0, 0, _) => format!("{minutes}m {secs}s"),
+        (0, _, _) => format!("{hours}h {minutes}m"),
+        _ => format!("{days}d {hours}h"),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::format_reign;
+
+    const SECOND: u64 = 1_000_000_000;
+
+    #[test]
+    fn reign_is_readable_at_every_scale() {
+        assert_eq!(format_reign(38 * SECOND), "38s");
+        assert_eq!(format_reign(252 * SECOND), "4m 12s");
+        assert_eq!(format_reign(8_100 * SECOND), "2h 15m");
+        assert_eq!(format_reign(273_600 * SECOND), "3d 4h");
     }
 }

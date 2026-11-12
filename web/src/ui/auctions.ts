@@ -71,7 +71,7 @@ export function createAuctionsPanel(root: HTMLElement, handlers: AuctionsHandler
       ? `<p class="muted">Outbid tokens are refunded at once. Raising your own highest bid only escrows the difference. A bid near the end extends the auction.
            ${formatBps(view.auctionBurnBps)} of the winning bid is burned, the rest goes to the cycle's sculptors.</p>
          <div class="cards">${view.cards.map((c) => card(c, view.canSign)).join("")}</div>`
-      : `<p class="placeholder">No open auction. A skin appears here when a cycle with at least one transformation molts.</p>`;
+      : `<p class="placeholder">No open auction. A skin appears here when a cycle with at least one transformation sheds.</p>`;
 
     root.querySelectorAll<HTMLInputElement>("input[name=amount]").forEach((input) => {
       input.value = typed.get(input.id) ?? "";

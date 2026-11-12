@@ -6,6 +6,7 @@ import type {
   Auction,
   CatalogEntry,
   Config,
+  Exuvia,
   JournalEntry,
   Mascot,
   Skin,
@@ -36,6 +37,8 @@ export interface Rpc {
   chainTimeNs(): Promise<string>;
   /** Exact yoctoNEAR deposit `transform` needs from this account right now (storage prepayment). */
   transformDeposit(accountId: string): Promise<string>;
+  /** Exuvia NFT by id ("1", "2", … consecutive), null past the last one. */
+  exuvia(tokenId: number): Promise<Exuvia | null>;
   /** yoctoNEAR deposit `claim_airdrop` needs (storage prepayment). */
   airdropDeposit(): Promise<string>;
 }
@@ -43,9 +46,18 @@ export interface Rpc {
 export function createRpc(cfg: AppConfig): Rpc {
   const provider = new JsonRpcProvider({ url: cfg.nodeUrl }, RPC_RETRY_OPTIONS);
 
-  async function view<T>(method: string, args: Record<string, unknown>, decoder: decode.Decoder<T>): Promise<T> {
-    const raw: unknown = await provider.callFunction({ contractId: cfg.contractId, method, args });
+  async function viewOn<T>(
+    contractId: string,
+    method: string,
+    args: Record<string, unknown>,
+    decoder: decode.Decoder<T>,
+  ): Promise<T> {
+    const raw: unknown = await provider.callFunction({ contractId, method, args });
     return decoder(raw, `${method}()`);
+  }
+
+  function view<T>(method: string, args: Record<string, unknown>, decoder: decode.Decoder<T>): Promise<T> {
+    return viewOn(cfg.contractId, method, args, decoder);
   }
 
   async function chainTimeNs(): Promise<string> {
@@ -72,6 +84,8 @@ export function createRpc(cfg: AppConfig): Rpc {
       view("storage_balance_of", { account_id: accountId }, decode.nullable(decode.storageBalance)),
     storageBalanceBounds: () => view("storage_balance_bounds", {}, decode.storageBalanceBounds),
     transformDeposit: (accountId) => view("transform_deposit", { account_id: accountId }, decode.uintString),
+    exuvia: (tokenId) =>
+      viewOn(cfg.exuviaeId, "exuviae_nft_token", { token_id: String(tokenId) }, decode.nullable(decode.exuvia)),
     airdropDeposit: () => view("airdrop_deposit", {}, decode.uintString),
   };
 }

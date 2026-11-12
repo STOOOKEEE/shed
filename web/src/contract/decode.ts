@@ -5,6 +5,9 @@ import {
   type Auction,
   type CatalogEntry,
   type Config,
+  type Exuvia,
+  type ExuviaMetadata,
+  type Face,
   type JournalEntry,
   type JournalKind,
   type Mascot,
@@ -109,6 +112,11 @@ const sculptor: Decoder<Sculptor> = (value, path) => {
   return { account_id: f("account_id", string), burned: f("burned", uintString) };
 };
 
+const face: Decoder<Face> = (value, path) => {
+  const f = fields(value, path);
+  return { token_id: f("token_id", string), owner_id: f("owner_id", string) };
+};
+
 export const mascot: Decoder<Mascot> = (value, path) => {
   const f = fields(value, path);
   return {
@@ -121,6 +129,7 @@ export const mascot: Decoder<Mascot> = (value, path) => {
     slot_changes: f("slot_changes", perSlot(number)),
     cycle_burned: f("cycle_burned", uintString),
     top_sculptor: f("top_sculptor", nullable(sculptor)),
+    face: f("face", nullable(face)),
   };
 };
 
@@ -172,6 +181,25 @@ export const journalEntry: Decoder<JournalEntry> = (value, path) => {
     skin_id: f("skin_id", nullable(number)),
     slot: f("slot", nullable(slot)),
     variant: f("variant", nullable(number)),
+  };
+};
+
+const exuviaMetadata: Decoder<ExuviaMetadata> = (value, path) => {
+  const f = fields(value, path);
+  return {
+    title: f("title", nullable(string)),
+    description: f("description", nullable(string)),
+    media: f("media", nullable(string)),
+    issued_at: f("issued_at", nullable(string)),
+  };
+};
+
+export const exuvia: Decoder<Exuvia> = (value, path) => {
+  const f = fields(value, path);
+  return {
+    token_id: f("token_id", string),
+    owner_id: f("owner_id", string),
+    metadata: f("metadata", exuviaMetadata),
   };
 };
 

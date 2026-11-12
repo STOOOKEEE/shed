@@ -16,6 +16,7 @@ Copy `.env.example` to `.env` and set:
 | variable | required | meaning |
 | --- | --- | --- |
 | `VITE_CONTRACT_ID` | yes | account id of the deployed SHED contract |
+| `VITE_EXUVIAE_ID` | no | exuviae (burn collection) NFT contract; defaults to `exuviae.<VITE_CONTRACT_ID>` |
 | `VITE_NETWORK` | no | `testnet` (default) or `mainnet` |
 | `VITE_NODE_URL` | no | custom RPC, e.g. `http://127.0.0.1:3030` for a local sandbox. Enables read-only mode (no wallet). |
 | `VITE_REPO_URL` | no | public repo URL, used for the README / rules links in the footer |
@@ -28,5 +29,6 @@ npm run build    # type-check (tsc --noEmit, strict) + production build in dist/
 npm run preview  # serve dist/
 ```
 
-Views refresh every 10 s and after each transaction. If the RPC is unreachable or the contract is not
+Views refresh every 10 s and after each transaction. Exuviae are immutable: each refresh only scans ids after the
+last one already loaded (up to 200). If the RPC is unreachable or the contract is not
 deployed, the page shows the error and keeps retrying.

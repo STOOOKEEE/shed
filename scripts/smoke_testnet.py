@@ -78,6 +78,23 @@ def wait_until_auction_ended(contract, skin_id):
         time.sleep(POLL_SECONDS)
 
 
+def wait_for_exuvia(exuviae, owner, attempts=6):
+    """Newest exuvia owned by `owner` (the cross-contract mint lands a block or two later)."""
+    for _ in range(attempts):
+        token_id, found = 1, None
+        while True:
+            token = view(exuviae, "exuviae_nft_token", {"token_id": str(token_id)})
+            if token is None:
+                break
+            if token["owner_id"] == owner:
+                found = token
+            token_id += 1
+        if found:
+            return found
+        time.sleep(POLL_SECONDS / 2)
+    return None
+
+
 def balance(contract, account):
     return int(view(contract, "ft_balance_of", {"account_id": account}))
 
@@ -117,6 +134,8 @@ def main(contract, p1, p2):
     check(second_face["owner_id"] == p2, f"{p2} now holds {second_face['token_id']}")
     check(view(contract, "nft_token", {"token_id": first_face["token_id"]}) is None,
           f"{first_face['token_id']} burned by the next change")
+    exuvia = wait_for_exuvia(f"exuviae.{contract}", p1)
+    check(exuvia is not None, f"{p1} received an exuvia in the burn collection")
     call(contract, p2, "nft_transfer", {"receiver_id": p1, "token_id": second_face["token_id"]},
          ONE_YOCTO, expect_failure=True)
     check(balance(contract, p1) == p1_before - base_price, f"{p1} paid the base price")

@@ -5,8 +5,10 @@ import { describeError } from "./errors";
 import { formatShed, parseShed } from "./format";
 import { createRpc } from "./near/rpc";
 import { createWallet, type WalletService } from "./near/wallet";
+import type { Exuvia } from "./contract/types";
 import { createStore, type AccountData, type GalleryData, type Snapshot } from "./store";
 import { createAuctionsPanel } from "./ui/auctions";
+import { createExuviaePanel } from "./ui/exuviae";
 import { startCountdownTicker } from "./ui/countdown";
 import { createFooter } from "./ui/footer";
 import { createGalleryPanel } from "./ui/gallery";
@@ -32,6 +34,7 @@ function start(app: HTMLElement, cfg: AppConfig): void {
   let account: AccountData | null = null;
   let gallery: GalleryData | null = null;
   let galleryPage = 0;
+  let exuviae: Exuvia[] | null = null;
   let busy = false;
 
   const wallet: WalletService | null = cfg.readOnly
@@ -86,6 +89,12 @@ function start(app: HTMLElement, cfg: AppConfig): void {
       galleryPage = nextGallery.page;
     } catch (error) {
       status.showError(describeError(error, cfg), REFRESH_SECONDS);
+    }
+    // The exuviae live on a separate contract: their failure must not hide the rest.
+    try {
+      exuviae = await store.loadExuviae();
+    } catch (error) {
+      status.showError(describeError(error, { contractId: cfg.exuviaeId, nodeUrl: cfg.nodeUrl }), REFRESH_SECONDS);
     }
     renderAll();
   }
@@ -208,6 +217,7 @@ function start(app: HTMLElement, cfg: AppConfig): void {
     },
     onClaim: (skinId) => void runTx(`Claim share of skin #${skinId}`, (w) => w.claimSculptorShare(skinId)),
   });
+  const exuviaePanel = createExuviaePanel(layout.exuviae);
   const supply = createSupplyPanel(layout.supply);
   const journal = createJournalPanel(layout.journal);
   const footer = createFooter(layout.footer);
@@ -232,16 +242,18 @@ function start(app: HTMLElement, cfg: AppConfig): void {
     footer.render({ app: cfg, config });
     if (!snapshot) return;
 
-    hero.render({ mascot: snapshot.mascot, canSign });
+    hero.render({ mascot: snapshot.mascot, accountId, canSign });
     sculpt.render({
       catalog: snapshot.catalog,
       mascot: snapshot.mascot,
       balance: currentAccount?.balance ?? null,
       transformDeposit: currentAccount?.transformDeposit ?? null,
+      accountId,
       canSign,
     });
     auctions.render({ auctions: snapshot.auctions, auctionBurnBps: snapshot.config.auction_burn_bps, canSign });
     if (gallery) galleryPanel.render({ gallery, accountId });
+    if (exuviae) exuviaePanel.render({ exuviae, accountId });
     supply.render({ stats: snapshot.stats, journal: snapshot.journal });
     journal.render({ journal: snapshot.journal, catalog: snapshot.catalog });
   }

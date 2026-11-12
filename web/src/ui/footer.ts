@@ -21,6 +21,7 @@ const RULES = [
   "When a cycle ends, its final look is frozen into an NFT skin and auctioned in $SHED.",
   "Part of the winning bid is burned; the rest is shared pro-rata by the cycle's sculptors. No bid: the top sculptor gets the skin.",
   "Storage is prepaid by callers: the first sculptor of a cycle pays the skin's storage (≈0.074 NEAR), new sculptors ≈0.004 NEAR.",
+  "Whoever changed the mascot last wears its face NFT (non-transferable, image = the live mascot). When someone else reshapes it, the face burns and the previous holder keeps a permanent exuvia in the burn collection; the new sculptor prepays its storage (≈0.014 NEAR).",
   "No admin, no pause, no upgrade. Anyone can call shed() to advance time.",
 ];
 

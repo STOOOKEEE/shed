@@ -38,11 +38,13 @@ sculpteurs). Historique et décisions : [docs/DEVLOG.md](docs/DEVLOG.md). Spéci
 
 ## Où on en est
 
-- Contrat complet, revu et testé (108 tests unitaires + 1 e2e sandbox), mascotte pixel art validée, NFT « face »
-  (mint au sculpteur, burn du précédent, non transférable). Front fonctionnel en lecture.
-- Testnet de test : `shed-lobster-test.testnet` (cycles 3 min, holder `shed-lobster-holder.testnet`, joueurs
-  `shed-lobster-p1/p2.testnet`, clés dans le trousseau macOS) ; smoke test complet passé le 2026-11-03.
-- Bot X prêt en dry-run ; attend le compte X, l'app développeur (OAuth 1.0a read+write) et des crédits.
-- Restent : refonte UI (+ signature des sculpteurs sur les skins si validée), déploiement démo testnet
-  `shed-lobster.testnet` (cycles 10 min) + verrouillage, test wallet, mainnet (sur confirmation explicite),
-  `repository` dans `contract/Cargo.toml`, vidéo + post X, soumission.
+- Deux contrats : `contract/` (token NEP-141 + skins + face NFT) et `contract/exuviae/` (collection burn, mint par
+  le principal uniquement), art partagé dans `contract/art/`. 97 tests unitaires + 1 e2e sandbox (les deux contrats).
+- Démo publique testnet : `shedcoin.testnet` + `exuviae.shedcoin.testnet` (cycles 10 min, holder
+  `shedcoin-holder.testnet`). Test : `shed-test.testnet` (3 min). Joueurs de test `molt-lobster-p1/p2.testnet`.
+  Clés dans le trousseau macOS. Smoke test complet passé sur les deux (2026-11-12). Contrats NON verrouillés.
+- Build : `cargo near build non-reproducible-wasm --no-abi` (l'étape ABI de cargo-near plante sur ce macOS).
+- Front : face + exuviae affichés, vérifié en lecture sur testnet ; pas encore testé avec un vrai wallet.
+- Bot X prêt en dry-run ; attend les clés OAuth 1.0a du compte @LobsterShed. Pas d'API pour changer l'avatar.
+- Restent : verrouillage (accord Armand), vidéo + post X, soumission (champs à fournir par Armand), deadline
+  2026-11-14 23:59 UTC.

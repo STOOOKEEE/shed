@@ -66,7 +66,7 @@ export function createGalleryPanel(root: HTMLElement, handlers: GalleryHandlers)
     render: memoRender((data: GalleryViewData) => {
       root.innerHTML = data.gallery.skins.length
         ? `<div class="cards cards-small">${data.gallery.skins.map((s) => card(s, data)).join("")}</div>${pager(data.gallery)}`
-        : `<p class="placeholder">No skin yet. The first one is minted when the first sculpted sheds.</p>`;
+        : `<p class="placeholder">No skin yet. The first one is minted when the first sculpted cycle sheds.</p>`;
     }),
   };
 }

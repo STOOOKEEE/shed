@@ -7,6 +7,7 @@ import { countdownHtml } from "./countdown";
 
 export interface HeroData {
   mascot: Mascot;
+  accountId: string | null;
   canSign: boolean;
 }
 
@@ -35,7 +36,18 @@ function shedControls(mascot: Mascot, canSign: boolean): string {
     ${canSign ? "" : `<p class="muted small">Sign in to trigger it.</p>`}`;
 }
 
-function renderMascot(root: HTMLElement, { mascot, canSign }: HeroData): void {
+function faceLine(mascot: Mascot, accountId: string | null): string {
+  const { face } = mascot;
+  if (!face) return `<p class="face-line muted small">No face yet: the first sculptor wears it.</p>`;
+  const yours = face.owner_id === accountId;
+  const badge = yours ? ` <span class="badge badge-live">You wear the face</span>` : "";
+  return `
+    <p class="face-line small${yours ? " is-mine" : ""}">Face NFT <code>${escapeHtml(face.token_id)}</code> worn by
+      <strong>${escapeHtml(formatAccount(face.owner_id))}</strong>${badge}
+      <span class="muted">— burns the moment someone reshapes the mascot</span></p>`;
+}
+
+function renderMascot(root: HTMLElement, { mascot, accountId, canSign }: HeroData): void {
   const top = mascot.top_sculptor
     ? `${escapeHtml(formatAccount(mascot.top_sculptor.account_id))} (${formatShed(mascot.top_sculptor.burned)} SHED)`
     : "nobody yet";
@@ -52,6 +64,7 @@ function renderMascot(root: HTMLElement, { mascot, canSign }: HeroData): void {
         <dt>Burned this cycle</dt><dd>${formatShed(mascot.cycle_burned)} SHED</dd>
         <dt>Top sculptor</dt><dd>${top}</dd>
       </dl>
+      ${faceLine(mascot, accountId)}
     </div>`;
 }
 

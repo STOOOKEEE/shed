@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { ConfigError, loadConfig } from "../src/config.js";
 
 const BASE = {
-  SHED_CONTRACT_ID: "shed-lobster-test.testnet",
+  SHED_CONTRACT_ID: "shedcoin.testnet",
   SHED_RPC_URL: "https://test.rpc.fastnear.com",
   STATE_FILE: "/tmp/shed-bot-state.json",
 };

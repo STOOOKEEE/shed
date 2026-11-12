@@ -53,7 +53,8 @@ Amounts are yocto-SHED strings (`U128`, 18 decimals). Times are nanoseconds (`U6
 
 ### Init
 
-`new({ config })` with `config`:
+`new({ config, exuviae_contract })`: `exuviae_contract` is the burn collection account (`exuviae.<contract>`) or
+`null`; `config`:
 
 | field | type |
 | --- | --- |
@@ -98,3 +99,20 @@ Plus NEP-141 (`ft_*`), NEP-145 (`storage_*`), NEP-148 (`ft_metadata`), NEP-171/1
 | `airdrop_deposit()` | U128 yoctoNEAR to attach to `claim_airdrop` |
 
 `genome` is an object `{ background, shell, pattern, eyes, claws, headgear }` of variant indices.
+
+## Exuviae (burn collection)
+
+Separate contract on the sub-account `exuviae.<contract>`, built from `contract/exuviae/` with the same renderer
+(`contract/art/`). It has no admin and accepts mints from the main contract only.
+
+| method | caller | effect |
+| --- | --- | --- |
+| `exuviae_new({ minter })` | deploy transaction | init; `minter` = main contract |
+| `mint({ sculptor, genome, reign_ns, successor })` | main contract only | mints exuvia `n` to `sculptor` |
+| `exuviae_nft_token({ token_id })` | view | NEP-171 `Token` (title, description with reign length and successor, SVG `media`) or `null` |
+
+Ids are `"1"`, `"2"`, … in mint order. `transform` calls `mint` as a detached cross-contract call when it burns
+someone else's face; the newcomer prepays the exuvia storage (`shed_exuviae::MINT_STORAGE_BYTES`, ≈0.014 NEAR) as part
+of `transform_deposit`. If the mint ever failed, the transform itself would stand: the exuvia is a keepsake, not
+part of the token accounting. Exports are hand-written (`exuviae_new`, `exuviae_nft_token`) so they cannot collide
+with the main contract's when the crate is linked into it.

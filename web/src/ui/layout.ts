@@ -11,6 +11,7 @@ export interface Layout {
   sculpt: HTMLElement;
   auctions: HTMLElement;
   gallery: HTMLElement;
+  exuviae: HTMLElement;
   supply: HTMLElement;
   journal: HTMLElement;
   footer: HTMLElement;
@@ -40,6 +41,10 @@ export function mountLayout(app: HTMLElement): Layout {
         <h2 id="gallery-title" class="tape">Shed skins</h2>
         <div id="gallery">${WAITING}</div>
       </section>
+      <section class="panel" aria-labelledby="exuviae-title">
+        <h2 id="exuviae-title" class="tape">Exuviae — the burn collection <small>carapaces of dethroned faces</small></h2>
+        <div id="exuviae">${WAITING}</div>
+      </section>
       <div class="split">
         <section class="panel" aria-labelledby="supply-title">
           <h2 id="supply-title" class="tape">Supply</h2>
@@ -63,6 +68,7 @@ export function mountLayout(app: HTMLElement): Layout {
     sculpt: get("sculpt"),
     auctions: get("auctions"),
     gallery: get("gallery"),
+    exuviae: get("exuviae"),
     supply: get("supply"),
     journal: get("journal"),
     footer: get("footer"),

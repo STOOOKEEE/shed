@@ -66,6 +66,13 @@ async fn full_shed_cycle_on_sandbox() -> TestResult {
     assert_eq!(exuvia["owner_id"], alice.as_str());
     let media = exuvia["metadata"]["media"].as_str().unwrap_or_default();
     assert!(media.starts_with("data:image/svg+xml;base64,"));
+    // Nobody can re-initialise the burn collection or mint into it directly.
+    env.exuviae_call_fails(&bob, "exuviae_new", json!({ "minter": bob }))
+        .await?;
+    let forged = json!({
+        "sculptor": bob, "genome": mascot["genome"], "reign_ns": "1", "successor": bob,
+    });
+    env.exuviae_call_fails(&bob, "mint", forged).await?;
 
     // 3. The cycle ends; anyone triggers the shed. The skin is held by the contract.
     env.wait_cycles(1).await?;

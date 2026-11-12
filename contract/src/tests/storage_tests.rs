@@ -118,3 +118,30 @@ fn airdrop_claims_prepay_their_storage() {
     call_as(&alice, GENESIS, 0);
     contract.claim_airdrop();
 }
+
+#[test]
+fn dethroning_someone_prepays_their_exuvia() {
+    call_as(&contract_id(), GENESIS, 0);
+    let mut contract = Shed::new(valid_config(), Some(account("exuviae")));
+    let (alice, bob) = (account("alice"), account("bob"));
+    fund(&mut contract, &alice, 10_000, GENESIS);
+    fund(&mut contract, &bob, 10_000, GENESIS);
+    sculpt(&mut contract, &alice, GENESIS + 1, Slot::Shell, 1);
+    call_as(&bob, GENESIS + 2, 0);
+    let expected = bytes_cost(CONTRIBUTION_STORAGE_BYTES + shed_exuviae::MINT_STORAGE_BYTES);
+    assert_eq!(contract.transform_deposit(bob).0, expected);
+}
+
+#[test]
+fn without_exuviae_contract_no_exuvia_is_prepaid() {
+    let mut contract = new_contract();
+    let (alice, bob) = (account("alice"), account("bob"));
+    fund(&mut contract, &alice, 10_000, GENESIS);
+    fund(&mut contract, &bob, 10_000, GENESIS);
+    sculpt(&mut contract, &alice, GENESIS + 1, Slot::Shell, 1);
+    call_as(&bob, GENESIS + 2, 0);
+    assert_eq!(
+        contract.transform_deposit(bob).0,
+        bytes_cost(CONTRIBUTION_STORAGE_BYTES)
+    );
+}

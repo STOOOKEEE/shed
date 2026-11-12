@@ -86,7 +86,7 @@ impl Env {
             .assert_success();
         let exuviae_wasm = std::fs::read(
             std::path::Path::new(&std::env::var("CARGO_MANIFEST_DIR").unwrap_or_default())
-                .join("exuviae/target/wasm32-unknown-unknown/release/shed_exuviae.wasm"),
+                .join("exuviae/target/near/shed_exuviae.wasm"),
         )?;
         near_api::Contract::deploy(exuviae_id.clone())
             .use_code(exuviae_wasm)
@@ -130,6 +130,24 @@ impl Env {
         deposit: NearToken,
     ) -> TestResult {
         self.send(who, method, args, deposit)
+            .await?
+            .assert_failure();
+        Ok(())
+    }
+
+    /// A call on the Exuviae contract that must fail.
+    pub async fn exuviae_call_fails(
+        &self,
+        who: &AccountId,
+        method: &str,
+        args: Value,
+    ) -> TestResult {
+        near_api::Contract(self.exuviae_id.clone())
+            .call_function(method, args)
+            .transaction()
+            .gas(GAS)
+            .with_signer(who.clone(), self.signer.clone())
+            .send_to(&self.network)
             .await?
             .assert_failure();
         Ok(())

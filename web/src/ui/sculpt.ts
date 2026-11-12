@@ -11,6 +11,7 @@ export interface SculptData {
   balance: string | null;
   /** yoctoNEAR deposit the next transform needs, null when signed out. */
   transformDeposit: string | null;
+  accountId: string | null;
   canSign: boolean;
 }
 
@@ -60,13 +61,19 @@ function slotRow(entry: CatalogEntry, mascot: Mascot, selected: Choice | null): 
 
 const ONE_YOCTO = 1n;
 
-/** Explains a storage prepayment above the 1 yocto security deposit. */
+/**
+ * Explains a storage prepayment above the 1 yocto security deposit. The amount always comes from
+ * `transform_deposit`; the reasons are only hints derived from the mascot state.
+ */
 function depositNote(data: SculptData): string {
   if (data.transformDeposit === null || BigInt(data.transformDeposit) <= ONE_YOCTO) return "";
-  const reason = BigInt(data.mascot.cycle_burned) === 0n
-    ? "first change of this cycle pays for the skin"
-    : "new sculptor this cycle";
-  return `<span class="muted small">+${formatNear(data.transformDeposit)} NEAR storage prepayment — ${reason}</span>`;
+  const face = data.mascot.face;
+  const dethronesFace = face !== null && face.owner_id !== data.accountId;
+  const reasons: string[] = [];
+  if (BigInt(data.mascot.cycle_burned) === 0n) reasons.push("first change of this cycle pays for the skin");
+  else if (!dethronesFace) reasons.push("new sculptor this cycle");
+  if (dethronesFace) reasons.push("includes storage for the previous face holder's exuvia");
+  return `<span class="muted small">+${formatNear(data.transformDeposit)} NEAR storage prepayment — ${reasons.join("; ")}</span>`;
 }
 
 function confirmBar(data: SculptData, selected: Choice): string {

@@ -2,6 +2,8 @@ export type Network = "testnet" | "mainnet";
 
 export interface AppConfig {
   contractId: string;
+  /** Account of the exuviae (burn collection) NFT contract. */
+  exuviaeId: string;
   network: Network;
   nodeUrl: string;
   /** True when a custom RPC is configured: no wallet, views only. */
@@ -44,6 +46,7 @@ export function loadConfig(env: ImportMetaEnv): AppConfig {
   const customNode = nonEmpty(env.VITE_NODE_URL);
   return {
     contractId,
+    exuviaeId: nonEmpty(env.VITE_EXUVIAE_ID) ?? `exuviae.${contractId}`,
     network,
     nodeUrl: customNode ?? DEFAULT_RPC_URL[network],
     readOnly: customNode !== null,

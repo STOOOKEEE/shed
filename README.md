@@ -3,12 +3,17 @@
 NEAR HACKATHON 2026 · track **Memecoins With Mechanics** (`memecoins`).
 
 $SHED is a NEP-141 memecoin with a public mascot: a 32×32 pixel-art lobster. Holders **burn $SHED to change one of
-its traits**. At the end of each cycle, the mascot **molts**: its final look becomes a unique NFT (a *skin*) whose
-image is drawn by the contract itself. The skin is **auctioned in $SHED**. Half of the winning bid is burned and
-the other half goes to the holders who sculpted that cycle, in proportion to what they burned.
+its traits**. Every change mints the sculptor the live *face* NFT and burns the previous holder's face, whose
+carapace is kept forever in a second collection, the **Exuviae**. At the end of each cycle, the mascot **sheds**: its
+final look becomes a unique NFT (a *skin*) whose image is drawn by the contract itself. The skin is **auctioned in
+$SHED**. Half of the winning bid is burned and the other half goes to the holders who sculpted that cycle, in
+proportion to what they burned.
 
-The whole mechanic runs in one contract. It has no backend, no admin key and no setter: every parameter is fixed
+The mechanic runs in two contracts and nothing else: no backend, no admin key, no setter. Every parameter is fixed
 at launch and readable through `config()`.
+
+**Live on NEAR testnet:** token + skins `shedcoin.testnet`, burn collection `exuviae.shedcoin.testnet`
+(10-minute cycles). Repository: <https://github.com/STOOOKEEE/shed>.
 
 <p>
 <img src="docs/gallery/genesis.svg" width="160" alt="genesis"> <img src="docs/gallery/chef.svg" width="160" alt="chef">
@@ -18,8 +23,8 @@ at launch and readable through `config()`.
 </p>
 
 Every image above is the contract's own output (`cargo run --example gallery`). The art is hand-placed pixel
-sprites, one text file per trait in [`contract/src/render/sprites/`](contract/src/render/sprites); the contract
-stacks the layers and emits an SVG, so the art never depends on a server or IPFS. 8 backgrounds × 8 shells ×
+sprites, one text file per trait in [`contract/art/src/sprites/`](contract/art/src/sprites); the contracts
+stack the layers and emit an SVG, so the art never depends on a server or IPFS. 8 backgrounds × 8 shells ×
 6 patterns × 6 faces × 5 claws × 7 headgear = 80,640 looks.
 
 ## The problem
@@ -41,10 +46,13 @@ the community one onchain ritual with consequences:
    which pays for the future skin, about 0.004 NEAR for a new sculptor of the cycle, and 1 yocto after that.
 3. **Last word costs more.** The price of a slot is `base × 1.5^k`, where `k` is the number of times that slot has
    already changed in the cycle. A tug-of-war over the shell gets expensive fast, and every step burns.
-3b. **Wear the face.** Every change mints the *face* NFT (`face-n`) of the new look to the sculptor and burns the
-   previous face in the same transaction. Only one face exists at a time: it belongs to whoever changed the mascot
-   last and burns the moment someone else does. It cannot be transferred or approved: it is a title, not an asset,
-   and its image is always the live mascot.
+3b. **Wear the face, keep the exuvia.** Every change mints the *face* NFT (`face-n`) of the new look to the sculptor
+   and burns the previous face in the same transaction. Only one face exists at a time: it belongs to whoever
+   changed the mascot last. It cannot be transferred or approved: it is a title, not an asset, and its image is
+   always the live mascot. The dethroned holder is not left empty-handed: the main contract mints them an
+   **exuvia** in the burn collection (`exuviae.<contract>`), a permanent, tradable NFT of the look they wore, with
+   how long they wore it and who dethroned them. The newcomer prepays its storage (≈0.014 NEAR, in
+   `transform_deposit`). Fighting over the mascot now leaves a collectible on both sides.
 4. **Shed.** Cycles run on a fixed schedule. When one ends, its final look is frozen into skin #n (NEP-171, SVG in
    the metadata) and the mascot carries that look into the next cycle. A cycle with no transformation makes no skin.
 5. **Auction.** Each skin is auctioned in $SHED for one cycle. Bids are escrowed by the contract and outbid tokens
@@ -79,29 +87,35 @@ Node 20+.
 
 ### B. Contract tests
 
-1. `cd contract && cargo test`
-   → 100 unit tests: pricing, schedule, sprite sheets and rendering (every shape combination within the size
-   budget), config validation, journal, every contract rule (burns, price
-   growth, shed, auction, anti-snipe, settlement, pro-rata claims), storage budgets measured against the worst case
-   (largest SVG, 64-character accounts), and guards (contract account, unregistering bidders, raising one's own bid). Then
-   `full_molt_cycle_on_sandbox` runs on a real sandbox with the release wasm: airdrop → 3 transforms → shed →
-   2 bids with refund → settlement burn → sculptor claim, checking `ft_total_supply` at the end.
-2. `cargo run --example simulate`
+1. `cd contract && cargo test` (after `cd contract/exuviae && cargo near build non-reproducible-wasm --no-abi` and
+   `cd contract && cargo near build non-reproducible-wasm --no-abi`, which build the two wasm the sandbox deploys)
+   → 97 unit tests: pricing, schedule, sprite sheets and rendering (every shape combination within the size
+   budget), config validation, journal, every contract rule (burns, price growth, faces minted and burned, exuvia
+   prepayment, shed, auction, anti-snipe, settlement, pro-rata claims), storage budgets measured against the worst
+   case (largest SVG, 64-character accounts), and guards (contract account, unregistering bidders, raising one's own
+   bid). Then `full_shed_cycle_on_sandbox` deploys **both contracts** on a real sandbox: airdrop → 3 transforms
+   (faces minted and burned, transfer of a face rejected, **exuvia #1 minted to the dethroned sculptor** in the burn
+   collection) → shed → 2 bids with refund → settlement burn → sculptor claim, checking `ft_total_supply`.
+2. `scripts/smoke_testnet.py <contract> <player1> <player2>` plays the same round on **testnet** with real
+   accounts (it passed on `shed-test.testnet`, 3-minute cycles).
+3. `cargo run --example simulate`
    → the 60-cycle supply simulation used to choose the parameters ([docs/simulation.md](docs/simulation.md)).
 
 ### C. Testnet
 
-Deploy with [`scripts/deploy-testnet.sh`](scripts/deploy-testnet.sh) (10-minute cycles), then lock it with
-[`scripts/lock-contract.sh`](scripts/lock-contract.sh), which deletes every access key on the contract account.
-Run the web app with `VITE_CONTRACT_ID=<contract>.testnet npm run dev` and sign in with a testnet wallet:
+[`scripts/deploy-testnet.sh`](scripts/deploy-testnet.sh) deploys the main contract and the Exuviae sub-account in
+one go (10-minute cycles); [`scripts/lock-contract.sh`](scripts/lock-contract.sh) then deletes every access key on
+both accounts. Run the web app with `VITE_CONTRACT_ID=shedcoin.testnet npm run dev` and sign in with a testnet wallet:
 
 1. **Claim airdrop** → one transaction registers storage and claims 100,000 SHED (≈0.005 NEAR of storage).
 2. **Sculpt**: pick a variant and confirm → your balance drops by the slot price, the supply panel shows the burn,
    and the next change of that slot costs ×1.5. If you are first in the cycle, the wallet asks ≈0.074 NEAR: the
    storage of the skin your cycle will become.
-3. After the cycle ends, **Trigger shed** → skin #n shows up in **Auctions** and in the gallery.
-4. **Bid** → your tokens are escrowed and the previous bidder is refunded.
-5. After the auction, **Trigger shed** again → the skin moves to the winner, 50 % of the bid is burned, and the
+3. Change a trait someone else set last → the wallet also prepays their exuvia; the hero shows **you wear the face**
+   and their exuvia appears in the **Exuviae** panel.
+4. After the cycle ends, **Trigger shed** → skin #n shows up in **Auctions** and in the gallery.
+5. **Bid** → your tokens are escrowed and the previous bidder is refunded.
+6. After the auction, **Trigger shed** again → the skin moves to the winner, 50 % of the bid is burned, and the
    sculptors see **Claim share** in the gallery.
 
 ## Parameters (fixed at launch)
@@ -123,9 +137,12 @@ hype saturates instead of draining the supply. Only deliberate whale fights burn
 
 ## Why NEAR
 
-- **One contract is both NEP-141 and NEP-171.** Bids, refunds, burns and NFT transfers are internal state
-  changes: no cross-contract call, no callback, no reentrancy surface. The sandbox test shows the whole cycle
-  settling inside single transactions.
+- **One contract is both NEP-141 and NEP-171.** Bids, refunds, burns and skin transfers are internal state
+  changes: no callback, no reentrancy surface. The sandbox test shows the whole cycle settling inside single
+  transactions.
+- **Sub-accounts prove provenance.** Only the owner of `shedcoin.testnet` could create `exuviae.shedcoin.testnet`,
+  so anyone can check the burn collection belongs to the project. It accepts mints from the main contract only, as
+  a fire-and-forget cross-contract call: if it ever failed, the game itself would not be affected.
 - **Onchain art is affordable.** NEAR's storage staking (about 1 NEAR per 100 kB) lets each skin keep its own
   pixel-art SVG (at most 4 kB, tested over every shape combination, base64 in NEP-177 `media`). The whole skin fits
   a 7 kB budget, 0.07 NEAR prepaid by the cycle's first sculptor. It does not depend on IPFS or a server.
@@ -145,9 +162,11 @@ hype saturates instead of draining the supply. Only deliberate whale fights burn
   only escrows the difference.
 - **Sniping** is limited by the anti-snipe extension, not eliminated.
 - **Storage.** Callers prepay what they create: skins (by the cycle's first sculptor), contributions (by each new
-  sculptor), airdrop records (by the claimer), FT registration (NEP-145). Budgets are upper bounds checked by unit
-  tests. The contract's own balance only covers the bounded journal (64 entries) and must keep a small NEAR
-  reserve; anyone can top it up with a plain transfer.
+  sculptor), exuviae (by whoever dethrones the face holder), airdrop records (by the claimer), FT registration
+  (NEP-145). Budgets are upper bounds checked by unit tests. The contract's own balance only covers the bounded
+  journal (64 entries) and must keep a small NEAR reserve; anyone can top it up with a plain transfer.
+- **Exuviae inflation.** Every reshaping mints one exuvia, so they are not rare by count; their value comes from the
+  look, the reign length written in the metadata, and the ×1.5 price ladder that makes each one cost a real burn.
 - **Rounding.** Sculptor shares round down; dust stays in the contract.
 - **Refunds always land.** Highest bidders cannot `storage_unregister` while their bid is escrowed, so an outbid
   refund can never be blocked by its recipient.
@@ -158,23 +177,27 @@ hype saturates instead of draining the supply. Only deliberate whale fights burn
 ## Repository
 
 ```
-contract/            Rust contract (near-sdk 5.29, near-contract-standards)
+contract/            main contract (near-sdk 5.29, near-contract-standards)
   src/lib.rs         state, init, time advance
   src/sculpt.rs      transform + closing a cycle into a skin
+  src/face.rs        face NFT: mint, burn, exuvia mint call
   src/auction.rs     bids, settlement, sculptor claims
   src/airdrop.rs     demo airdrop
   src/token.rs       NEP-141/145/148 + burn/escrow/payout helpers
-  src/skins.rs       NEP-171/177/178/181 + skin minting
+  src/skins.rs       NEP-171/177/178/181 + skin minting + NFT burn
   src/views.rs       read-only API
-  src/render/        pixel-art renderer: sprites/*.txt (one sheet per trait), palette, layer stacking → SVG
   src/pricing.rs     price ladder, bid step, auction split, pro-rata (256-bit)
   src/schedule.rs    cycle schedule
+  src/storage.rs     storage budgets and deposits
   src/journal.rs     bounded onchain log + NEP-297 events
   src/tests/         unit tests
-  tests/             sandbox end-to-end test (+ shared helpers)
+  tests/             sandbox end-to-end test of both contracts (+ shared helpers)
   examples/          local_demo, simulate, gallery
+  art/               shared pixel-art renderer: sprites/*.txt (one sheet per trait), palette, layers → SVG
+  exuviae/           burn collection contract (mint by the main contract only)
 web/                 Vite + TypeScript front end (@hot-labs/near-connect, near-api-js)
-scripts/             testnet deploy and lock
+bot/                 optional X announcer (read-only on NEAR, posts new looks and auction results)
+scripts/             testnet deploy, lock, smoke test
 docs/                design, simulation, gallery, devlog
 ```
 

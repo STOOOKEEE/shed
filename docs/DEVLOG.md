@@ -84,7 +84,7 @@ PNG embarqué écarté au profit du SVG : rendu net partout, y compris sur les m
 
 **Quoi.** Chaque `transform` mint au sculpteur un NFT `face-<n>` de la mascotte actuelle et brûle le précédent
 (événement NEP-171 `nft_burn`) : un seul existe, chez le dernier sculpteur. Non transférable et non approuvable.
-Déploiement de test `shed-lobster-test.testnet` (cycles de 3 min) et script `scripts/smoke_testnet.py` qui joue
+Déploiement de test `molt-lobster-test.testnet` (ancien nom) (cycles de 3 min) et script `scripts/smoke_testnet.py` qui joue
 une partie complète sur testnet. Bot d'annonces X hors chaîne (dossier `bot/`, sans clé NEAR).
 
 **Pourquoi.** Idée d'Armand : rendre la modification visible et statutaire (« c'est moi le visage de $SHED »), et
@@ -102,3 +102,27 @@ alimenter un compte X qui suit la mascotte.
 **Bugs & fix.**
 - `cargo near deploy` (near-cli 0.28 embarqué) ne trouvait pas la clé enregistrée par `near` 0.30 dans le
   trousseau : le script build avec cargo-near puis déploie avec `near contract deploy`.
+
+## 2026-11-12 — Renommage SHED, collection Exuviae, démo testnet
+
+**Quoi.** MOLT → SHED partout ($MOLT existait déjà : memecoin Moltbook sur Base, même animal). Collection burn
+« Exuviae » sur le sous-compte `exuviae.<contrat>` : chaque `transform` qui brûle le face de quelqu'un lui minte une
+exuvie permanente (look, durée du règne, successeur). Rendu partagé dans `contract/art/`. Démo `shedcoin.testnet`.
+
+**Pourquoi.** Idée d'Armand : celui qui se fait détrôner garde une trace transférable, donc chaque bagarre laisse un
+objet de collection des deux côtés. Le sous-compte prouve que la collection appartient au projet.
+
+**Cheminement.** Contrat séparé plutôt que des NFT `exuvia-n` dans le même contrat (les marketplaces regroupent par
+contrat). Appel inter-contrats détaché : si le mint échouait, la transformation reste valide. Le stockage de l'exuvie
+est prépayé par le nouveau sculpteur dans `transform_deposit`.
+
+**Bugs & fix.**
+- Collision de symboles wasm (`contract_source_metadata`, `new`, `nft_token`) entre les deux crates : exports de
+  l'Exuviae écrits à la main (`exuviae_new`, `mint`, `exuviae_nft_token`), sans `#[near(contract_state)]`.
+- Clés de stockage partagées entre les maps du NFT et celles du contrat (état corrompu, `Unreachable`) : préfixes
+  distincts.
+- Faille trouvée avant verrouillage : l'export `exuviae_new` réécrivait l'état sans contrôle, n'importe qui pouvait
+  se déclarer `minter`. Gardes `state_exists` + appelant = le compte lui-même, test e2e de l'attaque, redéployé.
+- Le contrat principal payait le stockage de chaque exuvie : ajouté à `transform_deposit` (test).
+- Push GitHub bloqué par 600 Mo de `target/` commités : retirés du commit non poussé, `.gitignore` corrigé.
+- L'étape ABI de cargo-near plante sur ce macOS (dylib) : build avec `--no-abi`.
