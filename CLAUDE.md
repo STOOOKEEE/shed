@@ -16,8 +16,9 @@ sculpteurs). Historique et décisions : [docs/DEVLOG.md](docs/DEVLOG.md). Spéci
 ## Commandes
 
 - Tests contrat (unitaires + sandbox) : `cd contract && cargo test`
-- Lint : `cd contract && cargo clippy --all-targets && cargo fmt --check`
-- Build wasm : `cd contract && cargo near build non-reproducible-wasm`
+- Lint : `cargo clippy --all-targets -- -D warnings && cargo fmt --check` dans `contract/`, `contract/exuviae/`, `contract/art/`
+- Build wasm : `cargo near build non-reproducible-wasm --no-abi` dans `contract/exuviae/` puis `contract/`
+- CI : `.github/workflows/ci.yml` (fmt, clippy, tests unitaires des 3 crates, wasm, e2e sandbox, bot, build web)
 - Démo locale : `cd contract && cargo run --example local_demo`, puis `cd web && VITE_CONTRACT_ID=shed.sandbox VITE_NODE_URL=<url> npm run dev`
 - Simulation : `cd contract && cargo run --example simulate` (écrit `docs/simulation.svg`)
 - Galerie : `cd contract && cargo run --example gallery` (écrit `docs/gallery/*.svg`)

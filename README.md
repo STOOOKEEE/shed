@@ -1,6 +1,7 @@
 # SHED — the memecoin that sheds its skins
 
 NEAR HACKATHON 2026 · track **Memecoins With Mechanics** (`memecoins`).
+[![CI](https://github.com/STOOOKEEE/shed/actions/workflows/ci.yml/badge.svg)](https://github.com/STOOOKEEE/shed/actions/workflows/ci.yml)
 
 $SHED is a NEP-141 memecoin with a public mascot: a 32×32 pixel-art lobster. Holders **burn $SHED to change one of
 its traits**. Every change mints the sculptor the live *face* NFT and burns the previous holder's face, whose

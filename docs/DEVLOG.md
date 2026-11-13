@@ -168,3 +168,14 @@ Vérifié avec fastnear limité : la page bascule sur zan et charge tout (mascot
 échec n'empêche jamais d'avancer le curseur), SVG comparé au dernier envoyé, échec réessayé après l'intervalle.
 Test wallet réel (Meteor) réussi : airdrop + transform, face-9 au testeur. Le « Failed to fetch » de Meteor venait
 de la limite fastnear sur notre IP partagée ; la transaction était passée (vérifié onchain).
+
+## 2026-11-13 — CI GitHub Actions
+
+**Quoi.** `.github/workflows/ci.yml` à chaque push/PR : fmt + clippy `-D warnings` + tests unitaires des trois crates,
+build des deux wasm, test e2e sur sandbox NEAR, tests du bot, build du front. Badge dans le README.
+
+**Pourquoi.** Rendre « 97 tests + e2e » vérifiable par un juge sans rien installer.
+
+**Bugs & fix.** Le crate `art` n'avait jamais exécuté ses propres tests : sans `near-sdk` en dev-dependency avec
+`unit-testing`, `cargo test` y échouait à la compilation (ses 8 tests ne tournaient que via rien). Ajouté, plus un
+formatage et un `items_after_test_module` clippy corrigés. Premier run CI vert (contrats ~12 min avec le sandbox).
