@@ -1,5 +1,5 @@
 // Typed, wallet-free view calls against the SHED contract.
-import { JsonRpcProvider } from "near-api-js";
+import { FailoverRpcProvider, JsonRpcProvider } from "near-api-js";
 import type { AppConfig } from "../config";
 import * as decode from "../contract/decode";
 import type {
@@ -16,7 +16,8 @@ import type {
   StorageBalanceBounds,
 } from "../contract/types";
 
-const RPC_RETRY_OPTIONS = { retries: 2, wait: 250, backoff: 2 };
+/** One quick retry per endpoint; on failure (e.g. HTTP 429) the next endpoint in `cfg.nodeUrls` takes over. */
+const RPC_RETRY_OPTIONS = { retries: 1, wait: 250, backoff: 2 };
 
 export interface Rpc {
   config(): Promise<Config>;
@@ -44,7 +45,7 @@ export interface Rpc {
 }
 
 export function createRpc(cfg: AppConfig): Rpc {
-  const provider = new JsonRpcProvider({ url: cfg.nodeUrl }, RPC_RETRY_OPTIONS);
+  const provider = new FailoverRpcProvider(cfg.nodeUrls.map((url) => new JsonRpcProvider({ url }, RPC_RETRY_OPTIONS)));
 
   async function viewOn<T>(
     contractId: string,

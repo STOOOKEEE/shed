@@ -84,11 +84,17 @@ export function createStore(rpc: Rpc): Store {
     return [...exuviae];
   }
 
+  // The auction card only shows a skin's id, cycle and image, which never change: fetch each skin once.
+  // Live bid state comes from `auctions()` on every refresh.
+  const auctionSkins = new Map<number, Skin>();
+
   async function loadAuctions(): Promise<AuctionView[]> {
     const auctions = await rpc.auctions();
-    const skins = await Promise.all(auctions.map((a) => rpc.skin(a.skin_id)));
-    return auctions.flatMap((auction, i) => {
-      const skin = skins[i];
+    const missing = auctions.map((a) => a.skin_id).filter((id) => !auctionSkins.has(id));
+    const fetched = await Promise.all(missing.map((id) => rpc.skin(id)));
+    for (const skin of fetched) if (skin) auctionSkins.set(skin.skin_id, skin);
+    return auctions.flatMap((auction) => {
+      const skin = auctionSkins.get(auction.skin_id);
       return skin ? [{ auction, skin }] : [];
     });
   }

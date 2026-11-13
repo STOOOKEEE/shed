@@ -260,7 +260,13 @@ function start(app: HTMLElement, cfg: AppConfig): void {
 
   renderAll();
   refresh();
-  setInterval(refresh, REFRESH_INTERVAL_MS);
+  // Background tabs don't poll: public RPCs rate-limit per IP. Catch up as soon as the tab is visible again.
+  setInterval(() => {
+    if (document.visibilityState === "visible") refresh();
+  }, REFRESH_INTERVAL_MS);
+  document.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "visible") refresh();
+  });
   startCountdownTicker(app);
 }
 
