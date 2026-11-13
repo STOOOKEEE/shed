@@ -144,3 +144,15 @@ transcription Whisper pour vérifier mots et calage.
 - 401 « Could not authenticate you » : le Client Secret OAuth 2.0 avait été mis à la place de l'API Key Secret.
 - 403 X : « maximum of one cashtag » ; les annonces répétaient `$SHED`. Seul le premier garde le `$`
   (`singleCashtag` dans `compose.ts`, test dédié). Vérifié en prod : les annonces de fin de cycle passent.
+
+## 2026-11-13 — Page hébergée et RPC en failover (retour d'un juge IA simulé)
+
+**Quoi.** Front publié sur GitHub Pages ; lectures RPC en failover sur 4 endpoints publics testnet ; skins des
+enchères chargés une seule fois ; pas de polling quand l'onglet est caché. README : lien vers la page, la vidéo, le bot.
+
+**Pourquoi.** Retour : « RPC UNREACHABLE » chez un relecteur (limite de débit de fastnear) et pas de page publique.
+
+**Cheminement.** Reproduit : notre IP était limitée par fastnear (429 sans en-têtes CORS, donc vu comme une erreur
+CORS par le navigateur). Endpoints de docs.near.org testés un par un (CORS + appel de vue) : drpc, zan, intea OK ;
+rpc.testnet.near.org déprécié (429), lava arrêté. `FailoverRpcProvider` de near-api-js plutôt qu'un code maison.
+Vérifié avec fastnear limité : la page bascule sur zan et charge tout (mascotte, 6 exuvies, pas de bannière).
