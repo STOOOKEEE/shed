@@ -11,7 +11,18 @@ export interface ComposeContext {
 }
 
 /** Appends the optional link and checks the X length budget. */
-function finish(body: string, ctx: ComposeContext): string {
+/** X rejects posts with more than one cashtag: keep the first `$TICKER`, drop the `$` on the rest. */
+function singleCashtag(body: string): string {
+  let seen = false;
+  return body.replace(/\$([A-Za-z]\w*)/g, (tag: string, symbol: string) => {
+    if (seen) return symbol;
+    seen = true;
+    return tag;
+  });
+}
+
+function finish(rawBody: string, ctx: ComposeContext): string {
+  const body = singleCashtag(rawBody);
   const text = ctx.publicUrl ? `${body}\n\n${ctx.publicUrl}` : body;
   if (bodyBudget(ctx) < xWeight(body)) throw new Error(`post too long (${xWeight(body)} > ${bodyBudget(ctx)})`);
   return text;

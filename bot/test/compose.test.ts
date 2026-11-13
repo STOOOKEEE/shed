@@ -73,8 +73,8 @@ test("settle post: sold with burn and sculptor share", () => {
     NO_LINK,
   );
   assert.match(text, /Skin #7 \(cycle 3\) sold to bob\.testnet for 6,000 \$SHED/);
-  assert.match(text, /3,000 \$SHED burned forever/);
-  assert.match(text, /3,000 \$SHED goes to the cycle's sculptors/);
+  assert.match(text, /3,000 SHED burned forever/);
+  assert.match(text, /3,000 SHED goes to the cycle's sculptors/);
 });
 
 test("settle post: no bid goes to the top sculptor", () => {
@@ -120,4 +120,13 @@ test("every template fits with worst-case 64-char accounts and huge amounts", ()
     composeBatch([entry({ account_id: worst, burned: huge })], CATALOG, worst, LINK),
   ];
   for (const text of texts) assert.ok(postWeight(text, LINK.publicUrl) <= X_MAX_WEIGHT, text);
+});
+
+test("every template carries at most one cashtag (X rejects more)", () => {
+  const texts = [
+    composeShed(entry({ kind: "shed", amount: (20_000n * SHED).toString(), skin_id: 2 }), SKIN, 5000, NO_LINK),
+    composeSettle(entry({ kind: "settle", account_id: "bob.testnet", amount: (6_000n * SHED).toString(), burned: (3_000n * SHED).toString(), skin_id: 2 }), SKIN, NO_LINK),
+    composeBatch([entry({}), entry({ account_id: "bob.testnet", slot: "headgear", variant: 1 })], CATALOG, "bob.testnet", NO_LINK),
+  ];
+  for (const text of texts) assert.ok((text.match(/\$[A-Za-z]/g) ?? []).length <= 1, text);
 });
