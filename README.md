@@ -13,7 +13,9 @@ The mechanic runs in two contracts and nothing else: no backend, no admin key, n
 at launch and readable through `config()`.
 
 **Try it in the browser: <https://stoookeee.github.io/shed/>** (NEAR testnet, sign in with any testnet wallet).
-Contracts: token + skins `shedcoin.testnet`, burn collection `exuviae.shedcoin.testnet` (10-minute cycles).
+Contracts: token + skins `shedcoin.testnet`, burn collection `exuviae.shedcoin.testnet` (10-minute cycles). **Both
+accounts are locked**: every access key was deleted on 2026-11-13, so nobody can redeploy or change them. Check it:
+`near account list-keys shedcoin.testnet network-config testnet now` returns an empty list.
 Repository: <https://github.com/STOOOKEEE/shed>.
 
 [![Demo video, 76 s](docs/media/shed-demo-poster.jpg)](docs/media/shed-demo.mp4)

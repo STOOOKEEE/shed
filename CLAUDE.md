@@ -42,7 +42,8 @@ sculpteurs). Historique et décisions : [docs/DEVLOG.md](docs/DEVLOG.md). Spéci
   le principal uniquement), art partagé dans `contract/art/`. 97 tests unitaires + 1 e2e sandbox (les deux contrats).
 - Démo publique testnet : `shedcoin.testnet` + `exuviae.shedcoin.testnet` (cycles 10 min, holder
   `shedcoin-holder.testnet`). Test : `shed-test.testnet` (3 min). Joueurs de test `molt-lobster-p1/p2.testnet`.
-  Clés dans le trousseau macOS. Smoke test complet passé sur les deux (2026-11-12). Contrats NON verrouillés.
+  Clés dans le trousseau macOS. Smoke test complet passé sur les deux (2026-11-12). `shedcoin.testnet` et
+  `exuviae.shedcoin.testnet` VERROUILLÉS le 2026-11-13 (0 clé) ; jeu vérifié après verrouillage (transform, face, exuvie).
 - Build : `cargo near build non-reproducible-wasm --no-abi` (l'étape ABI de cargo-near plante sur ce macOS).
 - Front hébergé : <https://stoookeee.github.io/shed/> (GitHub Pages, `.github/workflows/pages.yml`, à chaque push de
   `web/` sur `feat/molt` = branche par défaut). Lectures RPC en failover sur 4 endpoints publics testnet
@@ -52,5 +53,4 @@ sculpteurs). Historique et décisions : [docs/DEVLOG.md](docs/DEVLOG.md). Spéci
   (`bot/src/authorize.ts`). Clés locales : `~/.shed-x-keys.env`. Redéployer : rsync `bot/` vers `serveur:shed-bot/app`,
   `docker build -t shed-bot .` puis relancer le conteneur (`--read-only --cap-drop ALL`).
 - Vidéo de démo : `docs/media/shed-demo.mp4` (76 s, voix Kokoro locale ; script dans `~/Downloads/shed-video/SCRIPT.md`).
-- Restent : verrouillage (accord Armand), post X du hackathon, soumission (champs à fournir par Armand),
-  deadline 2026-11-14 23:59 UTC.
+- Restent : post X du hackathon, soumission (champs à fournir par Armand), deadline 2026-11-14 23:59 UTC.
