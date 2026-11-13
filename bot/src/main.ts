@@ -2,10 +2,11 @@
 
 import { setTimeout as sleep } from "node:timers/promises";
 import { Announcer, freshState } from "./announcer.js";
+import { AvatarSync, type AvatarUpdater } from "./avatar.js";
 import { ChainClient } from "./chain.js";
 import { ConfigError, loadConfig, type BotConfig } from "./config.js";
 import { errorFields, log, setLogLevel } from "./log.js";
-import { DryRunPublisher, XPublisher, type Publisher } from "./publish.js";
+import { DryRunAvatarUpdater, DryRunPublisher, XAvatarUpdater, XPublisher, type Publisher } from "./publish.js";
 import { loadState, saveState } from "./state.js";
 import { XClient } from "./x.js";
 
@@ -16,6 +17,11 @@ const EXIT_FAILURE = 1;
 function makePublisher(config: BotConfig): Publisher {
   if (config.dryRun || config.x === null) return new DryRunPublisher(config.outDir);
   return new XPublisher(new XClient(config.x));
+}
+
+function makeAvatarUpdater(config: BotConfig): AvatarUpdater {
+  if (config.dryRun || config.x === null) return new DryRunAvatarUpdater(config.outDir);
+  return new XAvatarUpdater(new XClient(config.x));
 }
 
 async function run(config: BotConfig, stop: AbortSignal): Promise<void> {
@@ -41,6 +47,7 @@ async function run(config: BotConfig, stop: AbortSignal): Promise<void> {
     },
     state,
   );
+  const avatar = new AvatarSync(chain, makeAvatarUpdater(config));
   log.info("shed-bot started", {
     contract: config.contractId,
     dry_run: config.dryRun,
@@ -55,6 +62,12 @@ async function run(config: BotConfig, stop: AbortSignal): Promise<void> {
     } catch (error) {
       // RPC hiccups and similar: keep the cursor where it was and retry on the next poll.
       log.error("poll failed", errorFields(error));
+    }
+    // Separate from announcements: a profile picture failure must never hold the cursor back.
+    try {
+      await avatar.tick();
+    } catch (error) {
+      log.error("profile picture sync failed", errorFields(error));
     }
     await sleep(config.pollSeconds * MS_PER_SECOND, undefined, { signal: stop }).catch((error: unknown) => {
       if (!stop.aborted) throw error;

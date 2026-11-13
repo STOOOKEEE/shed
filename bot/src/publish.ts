@@ -1,7 +1,8 @@
-// Where posts go: `out/` files in dry-run mode, the X API otherwise.
+// Where posts and profile pictures go: `out/` files in dry-run mode, the X API otherwise.
 
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import type { AvatarUpdater } from "./avatar.js";
 import { log } from "./log.js";
 import type { XClient } from "./x.js";
 
@@ -50,5 +51,26 @@ export class XPublisher implements Publisher {
     if (postId === null) return false;
     log.info("posted to X", { kind: post.kind, post_id: postId, ...post.meta });
     return true;
+  }
+}
+
+/** Overwrites `<outDir>/avatar.png`; never touches the network. */
+export class DryRunAvatarUpdater implements AvatarUpdater {
+  constructor(private readonly outDir: string) {}
+
+  async update(png: Buffer): Promise<boolean> {
+    await mkdir(this.outDir, { recursive: true });
+    const path = join(this.outDir, "avatar.png");
+    await writeFile(path, png);
+    log.info("dry-run profile picture written", { file: path });
+    return true;
+  }
+}
+
+export class XAvatarUpdater implements AvatarUpdater {
+  constructor(private readonly client: XClient) {}
+
+  update(png: Buffer): Promise<boolean> {
+    return this.client.updateProfileImage(png);
   }
 }

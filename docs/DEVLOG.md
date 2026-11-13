@@ -156,3 +156,15 @@ enchères chargés une seule fois ; pas de polling quand l'onglet est caché. RE
 CORS par le navigateur). Endpoints de docs.near.org testés un par un (CORS + appel de vue) : drpc, zan, intea OK ;
 rpc.testnet.near.org déprécié (429), lava arrêté. `FailoverRpcProvider` de near-api-js plutôt qu'un code maison.
 Vérifié avec fastnear limité : la page bascule sur zan et charge tout (mascotte, 6 exuvies, pas de bannière).
+
+## 2026-11-13 — Photo de profil du bot = mascotte en direct
+
+**Quoi.** Le bot remplace la photo de profil de @LobsterShed par la mascotte dès que son look change (max 1/min).
+
+**Pourquoi.** Demande d'Armand ; le compte X devient un miroir visible de l'état onchain.
+
+**Cheminement.** On avait conclu « impossible » en ne regardant que l'API v2. Testé en vrai : l'endpoint v1.1
+`account/update_profile_image` accepte nos jetons OAuth 1.0a (200). Module `avatar.ts` séparé de l'annonceur (un
+échec n'empêche jamais d'avancer le curseur), SVG comparé au dernier envoyé, échec réessayé après l'intervalle.
+Test wallet réel (Meteor) réussi : airdrop + transform, face-9 au testeur. Le « Failed to fetch » de Meteor venait
+de la limite fastnear sur notre IP partagée ; la transaction était passée (vérifié onchain).

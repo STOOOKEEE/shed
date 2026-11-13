@@ -15,6 +15,9 @@ It polls `journal({ limit: 64 })` (finality `final`) every `POLL_SECONDS` and ha
 | `transform` | batched, at most one post per `MIN_POST_INTERVAL_SECONDS`: who changed what, total burned, face holder | the live mascot |
 | `bid`, `airdrop`, `sculptor_claim` | ignored | — |
 
+The bot account's **profile picture is the live mascot**: each poll compares the mascot SVG with the last one uploaded
+and replaces the picture when the look changed (at most once a minute).
+
 Images are the contract's own 32×32 SVGs rendered to 1024×1024 PNGs with hard pixel edges. Texts stay under X's
 280 weighted characters (long change lists are folded into "…N earlier").
 
@@ -107,11 +110,17 @@ not restart it).
    token. A token generated while the app was read-only stays read-only: regenerate it after changing permissions.
 4. Copy the **API Key & Secret** (`X_CONSUMER_KEY`, `X_CONSUMER_SECRET`) and generate the **Access Token & Secret**
    (`X_ACCESS_TOKEN`, `X_ACCESS_SECRET`). They are shown once; store them in a password manager.
+   If the app belongs to another account, do not generate the token in the console (it would act as the app owner):
+   put the two consumer keys in an env file and run
+   `node --env-file=<keys.env> dist/authorize.js <keys.env>` (PIN-based OAuth). Open the printed link while logged in
+   as the bot account, authorize, type the PIN; the script appends the access token and secret without printing them.
 5. Buy credits in the console (see cost below), then set `DRY_RUN=false`.
 
 The bot uses `POST https://api.x.com/2/media/upload` (JSON, base64, `media_category: tweet_image`) and
-`POST https://api.x.com/2/tweets` (`text` + `media.media_ids`), both signed with OAuth 1.0a (HMAC-SHA1). X v2 has no
-endpoint to change the profile picture, so the bot does not do it.
+`POST https://api.x.com/2/tweets` (`text` + `media.media_ids`), both signed with OAuth 1.0a (HMAC-SHA1). X rejects a
+post with more than one cashtag, so only the first `$SHED` keeps its `$`. The profile picture follows the live
+mascot through `POST https://api.x.com/1.1/account/update_profile_image.json` (v2 has no such endpoint), at most once
+a minute and only when the look changed.
 
 ## Cost (pay-per-use)
 

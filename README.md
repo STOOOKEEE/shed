@@ -22,7 +22,8 @@ Repository: <https://github.com/STOOOKEEE/shed>.
 
 **Demo video (76 s):** [`docs/media/shed-demo.mp4`](docs/media/shed-demo.mp4), recorded on the live testnet
 deployment: three transforms, a shed, a bidding war, the bot's post, the exuviae. **Bot:**
-[@LobsterShed](https://x.com/LobsterShed) announces every look and auction result, reading the chain only.
+[@LobsterShed](https://x.com/LobsterShed) announces every look and auction result, and its profile picture is always
+the live lobster. It reads the chain only.
 
 <p>
 <img src="docs/gallery/genesis.svg" width="160" alt="genesis"> <img src="docs/gallery/chef.svg" width="160" alt="chef">
