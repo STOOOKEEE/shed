@@ -126,3 +126,21 @@ est prépayé par le nouveau sculpteur dans `transform_deposit`.
 - Le contrat principal payait le stockage de chaque exuvie : ajouté à `transform_deposit` (test).
 - Push GitHub bloqué par 600 Mo de `target/` commités : retirés du commit non poussé, `.gitignore` corrigé.
 - L'étape ABI de cargo-near plante sur ce macOS (dylib) : build avec `--no-abi`.
+
+## 2026-11-13 — Bot X en production, vidéo de démo
+
+**Quoi.** Le bot poste pour de vrai sur @LobsterShed depuis le serveur (Docker durci, lecture seule de la chaîne).
+Vidéo de démo de 76 s enregistrée sur la démo testnet (navigateur headless + transactions réelles), voix off locale.
+
+**Pourquoi.** Le post X de démo est obligatoire pour la soumission ; le bot montre la mécanique vivre sans nous.
+
+**Cheminement.** L'app X appartenait au compte développeur perso (« stoke ») : le bouton « Générer » de la console
+aurait produit un jeton pour ce compte-là. Plutôt que de racheter des crédits sur un autre compte, flux OAuth 1.0a
+PIN (`bot/src/authorize.ts`) : @LobsterShed autorise l'app, le script écrit le jeton dans le fichier de clés sans
+l'afficher. Voix : `say` macOS trop robotique, service en ligne écarté (texte et compte tiers) → Kokoro en local,
+transcription Whisper pour vérifier mots et calage.
+
+**Bugs & fix.**
+- 401 « Could not authenticate you » : le Client Secret OAuth 2.0 avait été mis à la place de l'API Key Secret.
+- 403 X : « maximum of one cashtag » ; les annonces répétaient `$SHED`. Seul le premier garde le `$`
+  (`singleCashtag` dans `compose.ts`, test dédié). Vérifié en prod : les annonces de fin de cycle passent.

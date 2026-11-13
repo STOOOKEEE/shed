@@ -45,6 +45,10 @@ sculpteurs). Historique et décisions : [docs/DEVLOG.md](docs/DEVLOG.md). Spéci
   Clés dans le trousseau macOS. Smoke test complet passé sur les deux (2026-11-12). Contrats NON verrouillés.
 - Build : `cargo near build non-reproducible-wasm --no-abi` (l'étape ABI de cargo-near plante sur ce macOS).
 - Front : face + exuviae affichés, vérifié en lecture sur testnet ; pas encore testé avec un vrai wallet.
-- Bot X prêt en dry-run ; attend les clés OAuth 1.0a du compte @LobsterShed. Pas d'API pour changer l'avatar.
-- Restent : verrouillage (accord Armand), vidéo + post X, soumission (champs à fournir par Armand), deadline
-  2026-11-14 23:59 UTC.
+- Bot X EN LIGNE (postes réels) sur `serveur` (SSH) : conteneur Docker `shed-bot`, env `~/shed-bot/shed-bot.env`
+  (600), suit `shedcoin.testnet`. App X du compte dev « stoke », autorisée par @LobsterShed via le flux PIN
+  (`bot/src/authorize.ts`). Clés locales : `~/.shed-x-keys.env`. Redéployer : rsync `bot/` vers `serveur:shed-bot/app`,
+  `docker build -t shed-bot .` puis relancer le conteneur (`--read-only --cap-drop ALL`).
+- Vidéo de démo : `~/Downloads/shed-video/shed-demo.mp4` (76 s, voix Kokoro locale, script `SCRIPT.md`).
+- Restent : verrouillage (accord Armand), post X du hackathon, soumission (champs à fournir par Armand),
+  deadline 2026-11-14 23:59 UTC.
