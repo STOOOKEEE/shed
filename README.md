@@ -12,8 +12,15 @@ proportion to what they burned.
 The mechanic runs in two contracts and nothing else: no backend, no admin key, no setter. Every parameter is fixed
 at launch and readable through `config()`.
 
-**Live on NEAR testnet:** token + skins `shedcoin.testnet`, burn collection `exuviae.shedcoin.testnet`
-(10-minute cycles). Repository: <https://github.com/STOOOKEEE/shed>.
+**Try it in the browser: <https://stoookeee.github.io/shed/>** (NEAR testnet, sign in with any testnet wallet).
+Contracts: token + skins `shedcoin.testnet`, burn collection `exuviae.shedcoin.testnet` (10-minute cycles).
+Repository: <https://github.com/STOOOKEEE/shed>.
+
+[![Demo video, 76 s](docs/media/shed-demo-poster.jpg)](docs/media/shed-demo.mp4)
+
+**Demo video (76 s):** [`docs/media/shed-demo.mp4`](docs/media/shed-demo.mp4), recorded on the live testnet
+deployment: three transforms, a shed, a bidding war, the bot's post, the exuviae. **Bot:**
+[@LobsterShed](https://x.com/LobsterShed) announces every look and auction result, reading the chain only.
 
 <p>
 <img src="docs/gallery/genesis.svg" width="160" alt="genesis"> <img src="docs/gallery/chef.svg" width="160" alt="chef">
@@ -101,11 +108,10 @@ Node 20+.
 3. `cargo run --example simulate`
    → the 60-cycle supply simulation used to choose the parameters ([docs/simulation.md](docs/simulation.md)).
 
-### C. Testnet
+### C. Testnet (hosted)
 
-[`scripts/deploy-testnet.sh`](scripts/deploy-testnet.sh) deploys the main contract and the Exuviae sub-account in
-one go (10-minute cycles); [`scripts/lock-contract.sh`](scripts/lock-contract.sh) then deletes every access key on
-both accounts. Run the web app with `VITE_CONTRACT_ID=shedcoin.testnet npm run dev` and sign in with a testnet wallet:
+Open <https://stoookeee.github.io/shed/> (built from `web/` by [`.github/workflows/pages.yml`](.github/workflows/pages.yml)),
+or run it locally with `cd web && VITE_CONTRACT_ID=shedcoin.testnet npm run dev`. Sign in with a testnet wallet:
 
 1. **Claim airdrop** → one transaction registers storage and claims 100,000 SHED (≈0.005 NEAR of storage).
 2. **Sculpt**: pick a variant and confirm → your balance drops by the slot price, the supply panel shows the burn,
@@ -117,6 +123,10 @@ both accounts. Run the web app with `VITE_CONTRACT_ID=shedcoin.testnet npm run d
 5. **Bid** → your tokens are escrowed and the previous bidder is refunded.
 6. After the auction, **Trigger shed** again → the skin moves to the winner, 50 % of the bid is burned, and the
    sculptors see **Claim share** in the gallery.
+
+To deploy your own copy: [`scripts/deploy-testnet.sh`](scripts/deploy-testnet.sh) deploys the main contract and the
+Exuviae sub-account in one go; [`scripts/lock-contract.sh`](scripts/lock-contract.sh) then deletes every access key on
+both accounts.
 
 ## Parameters (fixed at launch)
 
@@ -173,6 +183,8 @@ hype saturates instead of draining the supply. Only deliberate whale fights burn
 - **Deploy-to-lock window.** Between deployment and `lock-contract.sh`, the deployer key could still redeploy code.
   Run the two scripts back to back and check `list-keys` before trusting a deployment.
 - **No price promise.** Burning reduces supply; it says nothing about the price.
+- **Public RPCs rate-limit.** The web app reads through four public testnet endpoints and fails over to the next
+  one on an error such as HTTP 429; a background tab stops polling.
 
 ## Repository
 
