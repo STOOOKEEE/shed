@@ -12,7 +12,7 @@ proportion to what they burned.
 The mechanic runs in two contracts and nothing else: no backend, no admin key, no setter. Every parameter is fixed
 at launch and readable through `config()`.
 
-**Try it in the browser: <https://stoookeee.github.io/shed/>** (NEAR testnet, sign in with any testnet wallet).
+**Try it in the browser: <https://shedcoin.vercel.app>** (NEAR testnet, sign in with any testnet wallet).
 Contracts: token + skins `shedcoin.testnet`, burn collection `exuviae.shedcoin.testnet` (10-minute cycles). **Both
 accounts are locked**: every access key was deleted on 2026-11-13, so nobody can redeploy or change them. Check it:
 `near account list-keys shedcoin.testnet network-config testnet now` returns an empty list.
@@ -112,8 +112,9 @@ Node 20+.
 
 ### C. Testnet (hosted)
 
-Open <https://stoookeee.github.io/shed/> (built from `web/` by [`.github/workflows/pages.yml`](.github/workflows/pages.yml)),
-or run it locally with `cd web && VITE_CONTRACT_ID=shedcoin.testnet npm run dev`. Sign in with a testnet wallet:
+Open <https://shedcoin.vercel.app> (mirror built on every push by
+[`.github/workflows/pages.yml`](.github/workflows/pages.yml): <https://stoookeee.github.io/shed/>), or run it locally
+with `cd web && VITE_CONTRACT_ID=shedcoin.testnet npm run dev`. Sign in with a testnet wallet:
 
 1. **Claim airdrop** → one transaction registers storage and claims 100,000 SHED (≈0.005 NEAR of storage).
 2. **Sculpt**: pick a variant and confirm → your balance drops by the slot price, the supply panel shows the burn,

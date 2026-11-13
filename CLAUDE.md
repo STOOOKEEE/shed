@@ -45,9 +45,10 @@ sculpteurs). Historique et décisions : [docs/DEVLOG.md](docs/DEVLOG.md). Spéci
   Clés dans le trousseau macOS. Smoke test complet passé sur les deux (2026-11-12). `shedcoin.testnet` et
   `exuviae.shedcoin.testnet` VERROUILLÉS le 2026-11-13 (0 clé) ; jeu vérifié après verrouillage (transform, face, exuvie).
 - Build : `cargo near build non-reproducible-wasm --no-abi` (l'étape ABI de cargo-near plante sur ce macOS).
-- Front hébergé : <https://stoookeee.github.io/shed/> (GitHub Pages, `.github/workflows/pages.yml`, à chaque push de
-  `web/` sur `feat/molt` = branche par défaut). Lectures RPC en failover sur 4 endpoints publics testnet
-  (`config.ts`). Pas encore testé avec un vrai wallet.
+- Front hébergé : <https://shedcoin.vercel.app> (projet Vercel `shedcoin`, compte stoookeee, lié depuis `web/` ;
+  redéployer : `cd web && vercel deploy --prod --yes`, pas de déploiement auto). Miroir auto à chaque push :
+  <https://stoookeee.github.io/shed/> (`.github/workflows/pages.yml`). Lectures RPC en failover sur 4 endpoints
+  publics testnet (`config.ts`). Pas encore testé avec un vrai wallet.
 - Bot X EN LIGNE (postes réels) sur `serveur` (SSH) : conteneur Docker `shed-bot`, env `~/shed-bot/shed-bot.env`
   (600), suit `shedcoin.testnet`. App X du compte dev « stoke », autorisée par @LobsterShed via le flux PIN
   (`bot/src/authorize.ts`). Clés locales : `~/.shed-x-keys.env`. Redéployer : rsync `bot/` vers `serveur:shed-bot/app`,
