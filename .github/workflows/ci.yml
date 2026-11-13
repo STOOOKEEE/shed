@@ -1,0 +1,88 @@
+# Every push and PR: contracts (fmt, clippy, unit tests, wasm build, sandbox end-to-end), bot tests, web build.
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contracts:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contract
+    steps:
+      - uses: actions/checkout@v4
+      # rustup reads contract/rust-toolchain.toml (pinned 1.93.0 + wasm32 target, clippy, rustfmt).
+      - run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: |
+            contract
+            contract/exuviae
+            contract/art
+      - name: Install cargo-near
+        run: curl --proto '=https' --tlsv1.2 -LsSf https://github.com/near/cargo-near/releases/latest/download/cargo-near-installer.sh | sh
+      - name: Format
+        run: |
+          cargo fmt --check
+          (cd exuviae && cargo fmt --check)
+          (cd art && cargo fmt --check)
+      - name: Clippy
+        run: |
+          cargo clippy --all-targets -- -D warnings
+          (cd exuviae && cargo clippy --all-targets -- -D warnings)
+          (cd art && cargo clippy --all-targets -- -D warnings)
+      - name: Unit tests
+        run: |
+          cargo test --lib
+          (cd exuviae && cargo test)
+          (cd art && cargo test)
+      # The sandbox test deploys both wasm files, so build them first (ABI generation is not needed).
+      - name: Build wasm
+        run: |
+          (cd exuviae && cargo near build non-reproducible-wasm --no-abi)
+          cargo near build non-reproducible-wasm --no-abi
+      - name: End-to-end test on a local NEAR sandbox
+        run: cargo test --test shed_flow
+
+  bot:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bot
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: bot/package-lock.json
+      - run: npm ci
+      - run: npm test
+      - run: npm run build
+
+  web:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - run: npm ci
+      - run: npm run build
+        env:
+          VITE_CONTRACT_ID: shedcoin.testnet

@@ -11,8 +11,8 @@ mod palette;
 mod sprites;
 
 pub mod slot;
-use slot::{Genome, Slot};
 use palette::SHELLS;
+use slot::{Genome, Slot};
 use sprites::{SIZE, Sprite};
 
 /// Upper bound on a rendered SVG, keeps skin storage cost predictable.
@@ -109,6 +109,10 @@ fn pick(mut sheet: Vec<Sprite>, index: u8) -> Sprite {
     sheet.swap_remove(if index < sheet.len() { index } else { 0 })
 }
 
+/// `data:` URI suitable for NEP-177 `media`.
+pub fn svg_data_uri(svg: &str) -> String {
+    format!("data:image/svg+xml;base64,{}", STANDARD.encode(svg))
+}
 
 #[cfg(test)]
 mod tests {
@@ -181,9 +185,4 @@ mod tests {
             "largest skin renders {largest} bytes"
         );
     }
-}
-
-/// `data:` URI suitable for NEP-177 `media`.
-pub fn svg_data_uri(svg: &str) -> String {
-    format!("data:image/svg+xml;base64,{}", STANDARD.encode(svg))
 }

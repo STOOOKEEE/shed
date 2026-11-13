@@ -18,5 +18,8 @@ borsh = { version = "1", default-features = false, features = ["unstable__schema
 schemars = "0.8"
 near-sdk = "5.29"
 
+[dev-dependencies]
+near-sdk = { version = "5.29", features = ["unit-testing"] }
+
 [lints.rust]
 unexpected_cfgs = { level = "allow", check-cfg = ['cfg(near)'] }

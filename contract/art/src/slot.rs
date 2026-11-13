@@ -103,4 +103,3 @@ impl<T> PerSlot<T> {
 
 /// Variant index chosen for every slot.
 pub type Genome = PerSlot<u8>;
-
