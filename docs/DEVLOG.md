@@ -179,3 +179,10 @@ build des deux wasm, test e2e sur sandbox NEAR, tests du bot, build du front. Ba
 **Bugs & fix.** Le crate `art` n'avait jamais exécuté ses propres tests : sans `near-sdk` en dev-dependency avec
 `unit-testing`, `cargo test` y échouait à la compilation (ses 8 tests ne tournaient que via rien). Ajouté, plus un
 formatage et un `items_after_test_module` clippy corrigés. Premier run CI vert (contrats ~12 min avec le sandbox).
+
+## 2026-11-14 — Soumission
+
+**Quoi.** Soumis via l'API officielle (201), tracks `memecoins` + `nfts`. Post de démo publié par @LobsterShed avec la
+vidéo. README : lien du post, déclaration de l'autre projet de l'auteur (Tilt House, règle Q-015).
+
+**À tenir.** Démo hébergée et bot en ligne au moins jusqu'au 2026-11-18 (idéalement 2026-11-25).

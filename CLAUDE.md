@@ -55,4 +55,6 @@ sculpteurs). Historique et décisions : [docs/DEVLOG.md](docs/DEVLOG.md). Spéci
   (`bot/src/authorize.ts`). Clés locales : `~/.shed-x-keys.env`. Redéployer : rsync `bot/` vers `serveur:shed-bot/app`,
   `docker build -t shed-bot .` puis relancer le conteneur (`--read-only --cap-drop ALL`).
 - Vidéo de démo : `docs/media/shed-demo.mp4` (76 s, voix Kokoro locale ; script dans `~/Downloads/shed-video/SCRIPT.md`).
-- Restent : post X du hackathon, soumission (champs à fournir par Armand), deadline 2026-11-14 23:59 UTC.
+- SOUMIS le 2026-11-14 (HTTP 201), tracks `memecoins` + `nfts`, paiement `stoookeee.near`. Post de démo :
+  https://x.com/LobsterShed/status/2121540352486387905. Autre projet déclaré (Q-015) : Tilt House. Garder la démo
+  (Vercel, bot) en ligne au moins jusqu'au 2026-11-18, idéalement 2026-11-25. Résultats le 2026-11-18.
