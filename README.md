@@ -223,7 +223,11 @@ docs/                design, simulation, gallery, devlog
 
 near-sdk-rs 5.29, near-contract-standards 5.29, `uint` (256-bit math), cargo-near, near-sandbox, near-api-rs,
 Vite, TypeScript, @hot-labs/near-connect, near-api-js. Written with AI coding assistance (Claude). Built from
-scratch during NEAR HACKATHON (November 2026); no code predates the hackathon window.
+scratch during NEAR HACKATHON (November 2026); no code predates the hackathon window. The demo video's voice is
+synthetic (Kokoro TTS, voice `af_heart`).
+
+**Other submission by the same author:** [Tilt House](https://github.com/STOOOKEEE/tilt-house), a casino where you
+own the house (tracks `games` and `memecoins`). The two projects are independent and share no code.
 
 ## License
 
